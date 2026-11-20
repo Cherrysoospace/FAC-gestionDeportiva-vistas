@@ -32,4 +32,10 @@ describe('getAllowedModules', () => {
 
         expect(allowed.map((module) => module.to)).toEqual(['/equipos', '/escenarios', '/perfil']);
     });
+
+    it('muestra Jugadores con GET /gestion-deportiva/players', () => {
+        const allowed = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/players');
+
+        expect(allowed.map((module) => module.to)).toEqual(['/jugadores', '/perfil']);
+    });
 });

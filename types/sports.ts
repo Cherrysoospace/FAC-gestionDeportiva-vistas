@@ -475,3 +475,191 @@ export interface LocationQuery {
     venueId?: number;
     active?: boolean;
 }
+
+// ---- Jugador (players/dto/player-response.dto.ts) ----
+
+export type DominantFoot = 'RIGHT' | 'LEFT' | 'BOTH';
+
+export interface PlayerTeamSummary {
+    id: number;
+    name: string;
+}
+
+export interface Player {
+    id: number;
+    fullName: string;
+    // Sin puntos ni espacios (el backend lo normaliza)
+    documentNumber: string;
+    // Fecha de día 'YYYY-MM-DD'
+    birthDate: string;
+    // Calculada a partir de birthDate
+    age: number;
+    nationality: string;
+    position: string;
+    heightCm: number;
+    dominantFoot: DominantFoot | null;
+    active: boolean;
+    // Equipos con contrato vigente hoy; vacío = sin equipo
+    currentTeams: PlayerTeamSummary[];
+}
+
+export interface CreatePlayerPayload {
+    fullName: string;
+    documentNumber: string;
+    birthDate: string;
+    nationality: string;
+    position: string;
+    heightCm: number;
+    dominantFoot?: DominantFoot | null;
+}
+
+export interface UpdatePlayerPayload {
+    fullName?: string;
+    documentNumber?: string;
+    birthDate?: string;
+    nationality?: string;
+    position?: string;
+    heightCm?: number;
+    // null = no aplica
+    dominantFoot?: DominantFoot | null;
+    active?: boolean;
+}
+
+export interface PlayerQuery {
+    // Nombre o documento
+    search?: string;
+    active?: boolean;
+    // Contrato vigente en ese equipo
+    teamId?: number;
+    // Contrato vigente en un equipo de ese deporte
+    sportId?: number;
+}
+
+// ---- Equipo-Jugador (team-players/dto/team-player-response.dto.ts) ----
+
+export type ContractStatus = 'ACTIVE' | 'RELEASED';
+
+// Calculado: CURRENT = vigente hoy; UPCOMING = aún no empieza; PAST = retirado o vencido
+export type ContractStage = 'CURRENT' | 'UPCOMING' | 'PAST';
+
+export type ReleaseReason = 'TRANSFERRED' | 'CONTRACT_ENDED' | 'TERMINATED';
+
+export interface TeamPlayerTeam {
+    id: number;
+    name: string;
+    city: string;
+    modality: TeamModality;
+}
+
+export interface TeamPlayerPlayer {
+    id: number;
+    fullName: string;
+    documentNumber: string;
+    position: string;
+    age: number;
+}
+
+export interface TeamPlayer {
+    id: number;
+    team: TeamPlayerTeam;
+    player: TeamPlayerPlayer;
+    // Fechas de día 'YYYY-MM-DD'
+    startDate: string;
+    endDate: string;
+    status: ContractStatus;
+    stage: ContractStage;
+    // Solo en contratos RELEASED
+    releaseDate: string | null;
+    releaseReason: ReleaseReason | null;
+}
+
+export interface CreateTeamPlayerPayload {
+    teamId: number;
+    playerId: number;
+    startDate: string;
+    endDate: string;
+}
+
+// Solo contratos vigentes; el equipo y el jugador no cambian
+export interface UpdateTeamPlayerPayload {
+    startDate?: string;
+    endDate?: string;
+}
+
+export interface ReleaseTeamPlayerPayload {
+    reason: ReleaseReason;
+    // Ausente = hoy (o el fin del contrato si ya venció)
+    releaseDate?: string;
+}
+
+// Respuesta de PATCH /team-players/:id/release
+export interface ReleaseTeamPlayerResult {
+    message: string;
+    contract: TeamPlayer;
+}
+
+export interface TeamPlayerQuery {
+    teamId?: number;
+    playerId?: number;
+    status?: ContractStatus;
+    stage?: ContractStage;
+}
+
+// ---- Habilidad (skills/dto/skill-response.dto.ts) ----
+
+export type SkillCategory = 'PHYSICAL' | 'TECHNICAL' | 'TACTICAL' | 'MENTAL';
+
+export interface Skill {
+    id: number;
+    name: string;
+    category: SkillCategory;
+    description: string;
+}
+
+export interface SkillQuery {
+    search?: string;
+    category?: SkillCategory;
+}
+
+// ---- Habilidad-Jugador (player-skills/dto/player-skill-response.dto.ts) ----
+
+export interface PlayerSkillPlayer {
+    id: number;
+    fullName: string;
+    position: string;
+}
+
+export interface PlayerSkill {
+    id: number;
+    player: PlayerSkillPlayer;
+    skill: Skill;
+    // 1 a 100
+    level: number;
+}
+
+export interface CreatePlayerSkillPayload {
+    playerId: number;
+    skillId: number;
+    level: number;
+}
+
+export interface UpdatePlayerSkillPayload {
+    level: number;
+}
+
+export interface PlayerSkillQuery {
+    playerId?: number;
+    skillId?: number;
+}
+
+// ---- Perfil del jugador (player-profiles/dto/player-profile-response.dto.ts) ----
+
+// Listas vacías = "sin equipos" / "sin habilidades"
+export interface PlayerProfile {
+    player: Player;
+    currentTeams: TeamPlayer[];
+    upcomingTeams: TeamPlayer[];
+    // Retirados o vencidos, del más reciente al más antiguo
+    teamHistory: TeamPlayer[];
+    skills: PlayerSkill[];
+}

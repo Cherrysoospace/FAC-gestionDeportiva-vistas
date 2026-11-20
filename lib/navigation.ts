@@ -1,5 +1,6 @@
 import { EndpointRequirement } from '@/types/security';
 import { PERMISSIONS_VIEW_ENDPOINTS, ROLE_PERMISSIONS_VIEW_ENDPOINTS, ROLES_VIEW_ENDPOINTS, USERS_VIEW_ENDPOINTS } from './security-constants';
+import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
 import { VENUES_VIEW_ENDPOINTS } from './venue-constants';
 
@@ -70,6 +71,14 @@ export const APP_MODULES: AppModule[] = [
         to: '/escenarios',
         section: 'Gestión deportiva',
         requiredEndpoints: VENUES_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Jugadores',
+        description: 'Registra jugadores y consulta su perfil deportivo: equipos, traspasos y habilidades.',
+        icon: 'pi-user',
+        to: '/jugadores',
+        section: 'Gestión deportiva',
+        requiredEndpoints: PLAYERS_VIEW_ENDPOINTS
     },
     {
         label: 'Mi perfil',

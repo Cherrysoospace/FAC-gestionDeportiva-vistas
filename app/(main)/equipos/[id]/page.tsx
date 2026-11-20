@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
@@ -8,12 +8,14 @@ import { Skeleton } from 'primereact/skeleton';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { Toast } from 'primereact/toast';
 import ActiveTag from '@/components/ui/ActiveTag';
-import EmptyState from '@/components/ui/EmptyState';
 import PageHeader from '@/components/ui/PageHeader';
 import StatCard from '@/components/ui/StatCard';
 import { useAuth } from '@/layout/context/authcontext';
 import ProtectedRoute from '@/layout/ProtectedRoute';
+import { ContractFormValues, ReleaseFormValues, toCreateContractPayload, toReleasePayload, toUpdateContractPayload } from '@/lib/contract-form';
 import { FormActionResult } from '@/lib/form-action';
+import { PLAYER_PROFILE_ENDPOINTS, PLAYERS_VIEW_ENDPOINTS, TEAM_PLAYER_CREATE_ENDPOINT, TEAM_PLAYER_RELEASE_ENDPOINT, TEAM_PLAYER_UPDATE_ENDPOINT, TEAM_PLAYERS_LIST_ENDPOINT } from '@/lib/player-constants';
+import { RELEASE_REASON_LABELS } from '@/lib/player-labels';
 import {
     RELATED_TEAM_CREATE_ENDPOINT,
     RELATED_TEAM_DELETE_ENDPOINT,
@@ -30,15 +32,22 @@ import { TEAM_MODALITY_LABELS } from '@/lib/team-labels';
 import { SPORTS_LIST_ENDPOINT } from '@/lib/tournament-constants';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
-import { RelatedTeam, Sport, Team, TeamSportAssociation } from '@/types/sports';
+import { RelatedTeam, Sport, Team, TeamPlayer, TeamSportAssociation } from '@/types/sports';
+import { usePlayerOptions } from '../../hooks/usePlayerOptions';
 import { useSportOptions } from '../../hooks/useSportOptions';
+import { useTeamOptions } from '../../hooks/useTeamOptions';
+import ContractFormDialog from '../components/ContractFormDialog';
 import RelatedTeamsPanel from '../components/RelatedTeamsPanel';
+import ReleaseContractDialog from '../components/ReleaseContractDialog';
 import TeamFormDialog from '../components/TeamFormDialog';
+import TeamRosterPanel from '../components/TeamRosterPanel';
 import TeamSportsPanel from '../components/TeamSportsPanel';
 import { useRelatedTeams } from '../hooks/useRelatedTeams';
 import { useTeamDetail } from '../hooks/useTeamDetail';
-import { useTeamOptions } from '../hooks/useTeamOptions';
+import { useTeamRoster } from '../hooks/useTeamRoster';
 import { useTeamSports } from '../hooks/useTeamSports';
+
+type ContractDialog = { kind: 'form' | 'release' | null; contract: TeamPlayer | null };
 
 interface TeamDetailPageProps {
     params: { id: string };
@@ -57,6 +66,7 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
     const toast = useRef<Toast>(null);
     const { hasPermissionUrl } = useAuth();
     const [editing, setEditing] = useState(false);
+    const [contractDialog, setContractDialog] = useState<ContractDialog>({ kind: null, contract: null });
 
     const can = (...endpoints: EndpointRequirement[]) => endpoints.every((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method));
     const canUpdate = can(TEAM_UPDATE_ENDPOINT);
@@ -66,12 +76,22 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
     const canListRelated = can(RELATED_TEAMS_LIST_ENDPOINT);
     const canRelate = can(RELATED_TEAM_CREATE_ENDPOINT, ...TEAMS_VIEW_ENDPOINTS);
     const canUnrelate = can(RELATED_TEAM_DELETE_ENDPOINT);
+    const canListRoster = can(TEAM_PLAYERS_LIST_ENDPOINT);
+    const canAssignPlayer = can(TEAM_PLAYER_CREATE_ENDPOINT, ...PLAYERS_VIEW_ENDPOINTS);
+    const canEditContract = can(TEAM_PLAYER_UPDATE_ENDPOINT);
+    const canReleasePlayer = can(TEAM_PLAYER_RELEASE_ENDPOINT);
+    const canViewPlayer = can(...PLAYER_PROFILE_ENDPOINTS);
 
     const { team, loading, loadError, update, reload } = useTeamDetail(teamId);
     const teamSports = useTeamSports(teamId, canListTeamSports);
     const related = useRelatedTeams(teamId, canListRelated);
+    const roster = useTeamRoster(teamId, canListRoster, reload);
     const { sports } = useSportOptions(canAssociate);
     const { teams: candidates } = useTeamOptions(canRelate);
+    const { players } = usePlayerOptions(canAssignPlayer);
+    // Quien ya tiene contrato vigente o próximo en el equipo no se ofrece al asignar
+    const rosterPlayerIds = useMemo(() => new Set(roster.roster.map((contract) => contract.player.id)), [roster.roster]);
+    const closeContractDialog = () => setContractDialog({ kind: null, contract: null });
 
     const notify = (result: ActionResult, successText: string, errorSummary = 'No se pudo completar') =>
         toast.current?.show(result.ok ? { severity: 'success', summary: 'Listo', detail: successText, life: 3000 } : { severity: 'error', summary: errorSummary, detail: result.error, life: 6000 });
@@ -101,6 +121,22 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
         const name = candidates.find((candidate) => candidate.id === relatedTeamId)?.name ?? 'El equipo';
         notify(result, `${name} quedó relacionado.`, 'No se pudo relacionar');
         return result.ok;
+    };
+
+    // Los errores (409 "ya se encuentra asociado") los muestra el diálogo; aquí solo el éxito
+    const handleContractSubmit = async (values: ContractFormValues): Promise<FormActionResult> => {
+        const editingContract = contractDialog.contract;
+        const result = editingContract ? await roster.update(editingContract.id, toUpdateContractPayload(values, editingContract)) : await roster.assign(toCreateContractPayload(values, teamId));
+        if (result.ok) notify(result, editingContract ? 'Contrato actualizado.' : 'Jugador asignado a la plantilla.');
+        return result;
+    };
+
+    const handleRelease = async (values: ReleaseFormValues): Promise<FormActionResult> => {
+        const contract = contractDialog.contract;
+        if (!contract) return { ok: false };
+        const result = await roster.release(contract.id, toReleasePayload(values));
+        if (result.ok) notify(result, `${contract.player.fullName} salió de la plantilla (${RELEASE_REASON_LABELS[values.reason ?? 'CONTRACT_ENDED'].toLowerCase()}). Queda en el historial.`);
+        return result;
     };
 
     const handleUnrelate = async (relatedTeam: RelatedTeam) => {
@@ -174,9 +210,23 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
                                     />
                                 </TabPanel>
                             )}
-                            <TabPanel header="Plantilla">
-                                <EmptyState icon="pi-clock" title="Disponible próximamente" description="La plantilla y el historial de traspasos se gestionan en la siguiente entrega de vistas." />
-                            </TabPanel>
+                            {canListRoster && (
+                                <TabPanel header="Plantilla">
+                                    <TeamRosterPanel
+                                        roster={roster.roster}
+                                        history={roster.history}
+                                        loading={roster.loading}
+                                        error={roster.error}
+                                        canAssign={canAssignPlayer && team.active}
+                                        canEdit={canEditContract}
+                                        canRelease={canReleasePlayer}
+                                        canViewPlayer={canViewPlayer}
+                                        onAssign={() => setContractDialog({ kind: 'form', contract: null })}
+                                        onEdit={(contract) => setContractDialog({ kind: 'form', contract })}
+                                        onRelease={(contract) => setContractDialog({ kind: 'release', contract })}
+                                    />
+                                </TabPanel>
+                            )}
                         </TabView>
                         {!team.active && <Message severity="info" text="El equipo está inactivo: no se le pueden asociar deportes ni equipos hasta reactivarlo desde Editar." className="w-full mt-3" />}
                     </div>
@@ -184,6 +234,16 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
             )}
 
             <TeamFormDialog visible={editing} team={team} onHide={() => setEditing(false)} onSubmit={handleUpdate} />
+            <ContractFormDialog
+                visible={contractDialog.kind === 'form'}
+                teamName={team?.name ?? ''}
+                contract={contractDialog.contract}
+                players={players}
+                rosterPlayerIds={rosterPlayerIds}
+                onHide={closeContractDialog}
+                onSubmit={handleContractSubmit}
+            />
+            <ReleaseContractDialog visible={contractDialog.kind === 'release'} teamName={team?.name ?? ''} contract={contractDialog.contract} onHide={closeContractDialog} onSubmit={handleRelease} />
         </>
     );
 }
