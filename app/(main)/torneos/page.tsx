@@ -222,7 +222,7 @@ function TournamentsContent() {
                     dataKey="id"
                     paginator={!loading && tournaments.length > 10}
                     rows={10}
-                    emptyMessage={<EmptyState icon="pi-trophy" title={hasFilters ? 'Ningún torneo coincide con los filtros.' : 'No hay torneos registrados.'} />}
+                    emptyMessage={<EmptyState icon="pi-sitemap" title={hasFilters ? 'Ningún torneo coincide con los filtros.' : 'No hay torneos registrados.'} />}
                 >
                     <Column header="Nombre" body={nameBody} />
                     <Column header="Deporte" body={sportBody} />

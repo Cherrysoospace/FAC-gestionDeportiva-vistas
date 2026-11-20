@@ -31,7 +31,7 @@ const RESOURCE_ICONS: Record<string, string> = {
     Permisos: 'pi-key',
     'Asignación de roles': 'pi-id-card',
     'Asignación de permisos': 'pi-lock',
-    Torneos: 'pi-trophy',
+    Torneos: 'pi-sitemap',
     Equipos: 'pi-users',
     Jugadores: 'pi-user',
     Partidos: 'pi-globe',

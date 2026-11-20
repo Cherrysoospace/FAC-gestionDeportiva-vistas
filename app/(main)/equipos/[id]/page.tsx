@@ -258,7 +258,7 @@ function TeamStats({ team, relatedCount, showRelated }: { team: Team; relatedCou
                 <StatCard label="Jugadores en plantilla" value={team.playersCount} icon="pi-users" />
             </div>
             <div className="col-12 md:col-6 xl:col-3">
-                <StatCard label="Inscripciones activas" value={team.activeRegistrationsCount} icon="pi-trophy" />
+                <StatCard label="Inscripciones activas" value={team.activeRegistrationsCount} icon="pi-sitemap" />
             </div>
             {showRelated && (
                 <div className="col-12 md:col-6 xl:col-3">

@@ -51,7 +51,7 @@ export const APP_MODULES: AppModule[] = [
     {
         label: 'Torneos',
         description: 'Crea torneos y gestiona sus fases e inscripciones.',
-        icon: 'pi-trophy',
+        icon: 'pi-sitemap',
         to: '/torneos',
         section: 'Gestión deportiva',
         // Permiso de ms-sports, registrado en ms_security con el prefijo /gestion-deportiva
@@ -76,7 +76,7 @@ export const APP_MODULES: AppModule[] = [
     {
         label: 'Jugadores',
         description: 'Registra jugadores y consulta su perfil deportivo: equipos, traspasos y habilidades.',
-        icon: 'pi-user',
+        icon: 'pi-id-card',
         to: '/jugadores',
         section: 'Gestión deportiva',
         requiredEndpoints: PLAYERS_VIEW_ENDPOINTS

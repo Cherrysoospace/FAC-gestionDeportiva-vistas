@@ -1,0 +1,59 @@
+/*
+ * Corrección del tema lara-light-teal de PrimeReact 10.2.1 (public/themes).
+ * En esa versión el "resaltado" (opción seleccionada, día elegido del
+ * calendario, fila seleccionada...) usa el MISMO color para el texto y el
+ * fondo (#0f766e), así que el texto no se ve. Se restauran los colores de
+ * Lara: fondo teal-50 con texto teal-700, y texto blanco donde el fondo verde
+ * es correcto (hover de checkbox y radio).
+ * Se antepone `body` para ganar especificidad sin importar el orden en que
+ * se carguen el tema (<link>) y estos estilos.
+ */
+$highlight-bg: #f0fdfa;
+$highlight-text: #0f766e;
+
+:root {
+    --highlight-bg: #{$highlight-bg};
+    --highlight-text-color: #{$highlight-text};
+}
+
+// Opciones, días y elementos seleccionados: fondo claro y texto verde
+body {
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+    .p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight,
+    .p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item.p-highlight,
+    .p-autocomplete .p-autocomplete-multiple-container .p-autocomplete-token,
+    .p-cascadeselect-panel .p-cascadeselect-items .p-cascadeselect-item.p-highlight,
+    .p-listbox .p-listbox-list .p-listbox-item.p-highlight,
+    .p-mention-panel .p-mention-items .p-mention-item.p-highlight,
+    .p-datepicker table td > span.p-highlight,
+    .p-datepicker table td.p-datepicker-today > span.p-highlight,
+    .p-datepicker .p-monthpicker .p-monthpicker-month.p-highlight,
+    .p-datepicker .p-yearpicker .p-yearpicker-year.p-highlight,
+    .p-column-filter-overlay .p-column-filter-row-items .p-column-filter-row-item.p-highlight,
+    .p-orderlist .p-orderlist-list .p-orderlist-item.p-highlight,
+    .p-picklist .p-picklist-list .p-picklist-item.p-highlight,
+    .p-datatable .p-sortable-column .p-sortable-column-badge,
+    .p-datatable .p-sortable-column.p-highlight,
+    .p-datatable .p-sortable-column.p-highlight:not(.p-sortable-disabled):hover,
+    .p-datatable .p-datatable-tbody > tr > td.p-highlight,
+    .p-datatable .p-datatable-tbody > tr.p-highlight,
+    .p-datatable.p-datatable-striped .p-datatable-tbody > tr.p-row-odd.p-highlight,
+    .p-treetable .p-sortable-column .p-sortable-column-badge,
+    .p-treetable .p-sortable-column.p-highlight,
+    .p-treetable .p-treetable-tbody > tr.p-highlight,
+    .p-treetable.p-treetable-striped .p-treetable-tbody > tr.p-row-odd.p-highlight,
+    .p-tree .p-tree-container .p-treenode .p-treenode-content.p-highlight,
+    .p-organizationchart .p-organizationchart-node-content.p-highlight,
+    .p-steps .p-steps-item.p-highlight .p-steps-number,
+    .p-column-filter-menu-button.p-column-filter-menu-button-active {
+        background: $highlight-bg;
+        color: $highlight-text;
+    }
+
+    // Fondo verde correcto: el texto (el visto ✓) debe ser blanco
+    .p-checkbox .p-checkbox-box.p-highlight:not(.p-disabled):hover,
+    .p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-highlight:hover,
+    .p-radiobutton .p-radiobutton-box.p-highlight:not(.p-disabled):hover {
+        color: #ffffff;
+    }
+}
