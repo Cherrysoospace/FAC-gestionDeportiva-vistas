@@ -27,7 +27,7 @@ import LocationsPanel from '../components/LocationsPanel';
 import VenueFormDialog from '../components/VenueFormDialog';
 import { useLocations } from '../hooks/useLocations';
 import { useVenueDetail } from '../hooks/useVenueDetail';
-import { useVenueOptions } from '../hooks/useVenueOptions';
+import { useVenueOptions } from '../../hooks/useVenueOptions';
 
 interface VenueDetailPageProps {
     params: { id: string };

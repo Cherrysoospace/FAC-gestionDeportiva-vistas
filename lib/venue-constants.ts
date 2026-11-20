@@ -23,3 +23,12 @@ export const LOCATION_CREATE_ENDPOINT: EndpointRequirement = { url: LOCATIONS, m
 export const LOCATION_UPDATE_ENDPOINT: EndpointRequirement = { url: `${LOCATIONS}/{id}`, method: 'PATCH' };
 
 export const LOCATION_DELETE_ENDPOINT: EndpointRequirement = { url: `${LOCATIONS}/{id}`, method: 'DELETE' };
+
+// Escenario-Torneo: escenarios habilitados para cada torneo
+const TOURNAMENT_VENUES = `${SPORTS_PERMISSION_PREFIX}/tournament-venues`;
+
+export const TOURNAMENT_VENUES_LIST_ENDPOINT: EndpointRequirement = { url: TOURNAMENT_VENUES, method: 'GET' };
+
+export const TOURNAMENT_VENUE_CREATE_ENDPOINT: EndpointRequirement = { url: TOURNAMENT_VENUES, method: 'POST' };
+
+export const TOURNAMENT_VENUE_DELETE_ENDPOINT: EndpointRequirement = { url: `${TOURNAMENT_VENUES}/{id}`, method: 'DELETE' };

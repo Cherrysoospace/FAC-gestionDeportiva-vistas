@@ -663,3 +663,37 @@ export interface PlayerProfile {
     teamHistory: TeamPlayer[];
     skills: PlayerSkill[];
 }
+
+// ---- Escenario-Torneo (tournament-venues/dto/tournament-venue-response.dto.ts) ----
+
+export interface TournamentVenueTournament {
+    id: number;
+    name: string;
+    status: TournamentStatus;
+}
+
+export interface TournamentVenueVenue {
+    id: number;
+    name: string;
+    address: string | null;
+    // Complejo que lo contiene; null = escenario principal
+    parent: VenueParent | null;
+}
+
+export interface TournamentVenue {
+    id: number;
+    tournament: TournamentVenueTournament;
+    venue: TournamentVenueVenue;
+    // Partidos no cancelados del torneo en este escenario: > 0 = no se puede retirar
+    scheduledMatchesCount: number;
+}
+
+export interface CreateTournamentVenuePayload {
+    tournamentId: number;
+    venueId: number;
+}
+
+export interface TournamentVenueQuery {
+    tournamentId?: number;
+    venueId?: number;
+}

@@ -17,12 +17,16 @@ import { toUpdatePayload, TournamentActionResult, TournamentFormValues } from '@
 import { allowedTransitions, formatDateTime, formatDay, TOURNAMENT_STATUS_LABELS } from '@/lib/tournament-labels';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
-import { Tournament, TournamentStatus } from '@/types/sports';
+import { Tournament, TournamentStatus, TournamentVenue } from '@/types/sports';
+import { TOURNAMENT_VENUE_CREATE_ENDPOINT, TOURNAMENT_VENUE_DELETE_ENDPOINT, TOURNAMENT_VENUES_LIST_ENDPOINT, VENUE_DETAIL_ENDPOINTS, VENUES_VIEW_ENDPOINTS } from '@/lib/venue-constants';
 import { TournamentActiveTag, TournamentStatusTag } from '../components/TournamentBadges';
 import TournamentFormDialog from '../components/TournamentFormDialog';
 import TournamentStatusDialog from '../components/TournamentStatusDialog';
+import TournamentVenuesPanel from '../components/TournamentVenuesPanel';
 import { useSportOptions } from '../../hooks/useSportOptions';
+import { useVenueOptions } from '../../hooks/useVenueOptions';
 import { useTournamentDetail } from '../hooks/useTournamentDetail';
+import { useTournamentVenues } from '../hooks/useTournamentVenues';
 
 interface TournamentDetailPageProps {
     params: { id: string };
@@ -47,6 +51,26 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
     const canUpdate = can(TOURNAMENT_UPDATE_ENDPOINT);
     const canListSports = can(SPORTS_LIST_ENDPOINT);
     const { sports } = useSportOptions(canListSports && canUpdate);
+
+    // Pestaña Escenarios (Escenario-Torneo)
+    const canListTournamentVenues = can(TOURNAMENT_VENUES_LIST_ENDPOINT);
+    const canEnableVenue = can(TOURNAMENT_VENUE_CREATE_ENDPOINT, ...VENUES_VIEW_ENDPOINTS);
+    const canRemoveVenue = can(TOURNAMENT_VENUE_DELETE_ENDPOINT);
+    const canViewVenue = can(...VENUE_DETAIL_ENDPOINTS);
+    const tournamentVenues = useTournamentVenues(tournamentId, canListTournamentVenues);
+    const { venues } = useVenueOptions(canEnableVenue);
+
+    const handleEnableVenue = async (venueId: number) => {
+        const result = await tournamentVenues.enable(venueId);
+        const name = venues.find((venue) => venue.id === venueId)?.name ?? 'El escenario';
+        notify(result, `${name} quedó habilitado para el torneo.`, 'No se pudo habilitar el escenario');
+        return result.ok;
+    };
+
+    const handleRemoveVenue = async (tournamentVenue: TournamentVenue) => {
+        const result = await tournamentVenues.remove(tournamentVenue.id);
+        notify(result, `Se retiró ${tournamentVenue.venue.name} de los escenarios del torneo.`, 'No se pudo retirar el escenario');
+    };
 
     const notify = (result: ActionResult, successText: string, errorSummary = 'No se pudo completar') =>
         toast.current?.show(result.ok ? { severity: 'success', summary: 'Listo', detail: successText, life: 3000 } : { severity: 'error', summary: errorSummary, detail: result.error, life: 6000 });
@@ -109,7 +133,22 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
                             <ComingSoon />
                         </TabPanel>
                         <TabPanel header="Escenarios">
-                            <ComingSoon />
+                            {canListTournamentVenues ? (
+                                <TournamentVenuesPanel
+                                    tournamentVenues={tournamentVenues.tournamentVenues}
+                                    venues={venues}
+                                    loading={tournamentVenues.loading}
+                                    error={tournamentVenues.error}
+                                    locked={tournament.status === 'FINISHED' || tournament.status === 'CANCELLED'}
+                                    canEnable={canEnableVenue}
+                                    canRemove={canRemoveVenue}
+                                    canViewVenue={canViewVenue}
+                                    onEnable={handleEnableVenue}
+                                    onRemove={handleRemoveVenue}
+                                />
+                            ) : (
+                                <EmptyState icon="pi-lock" title="No tienes permiso para consultar los escenarios del torneo." />
+                            )}
                         </TabPanel>
                     </TabView>
                 </div>

@@ -24,7 +24,7 @@ import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Venue } from '@/types/sports';
 import VenueFormDialog from './components/VenueFormDialog';
-import { useVenueOptions } from './hooks/useVenueOptions';
+import { useVenueOptions } from '../hooks/useVenueOptions';
 import { useVenues } from './hooks/useVenues';
 
 const SEARCH_DEBOUNCE_MS = 400;
