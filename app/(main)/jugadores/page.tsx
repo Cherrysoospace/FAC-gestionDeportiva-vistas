@@ -166,7 +166,7 @@ function PlayersContent() {
                 <h5>Lista de jugadores {!loading && <span className="text-600 font-normal">({players.length})</span>}</h5>
                 <div className="grid mb-2">
                     <div className="col-12 md:col-6 lg:col-3">
-                        <SearchInput value={searchText} onChange={setSearchText} ariaLabel="Buscar jugadores por nombre o documento" placeholder="Buscar por nombre o documento" className="w-full" />
+                        <SearchInput value={searchText} onChange={setSearchText} ariaLabel="Buscar jugadores por nombre o documento" placeholder="Nombre o documento" className="w-full" />
                     </div>
                     <div className="col-12 md:col-6 lg:col-3">
                         <Dropdown
@@ -194,7 +194,7 @@ function PlayersContent() {
                         />
                     </div>
                     <div className="col-12 md:col-6 lg:col-3">
-                        <Dropdown value={active} options={ACTIVE_OPTIONS} onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
+                        <Dropdown value={active} options={ACTIVE_OPTIONS} placeholder="Todos los estados" onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
                     </div>
                 </div>
 

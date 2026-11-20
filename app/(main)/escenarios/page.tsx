@@ -158,7 +158,7 @@ function VenuesContent() {
                         <SearchInput value={searchText} onChange={setSearchText} ariaLabel="Buscar escenarios por nombre" placeholder="Buscar escenario" className="w-full" />
                     </div>
                     <div className="col-12 md:col-6 lg:col-3">
-                        <Dropdown value={active} options={ACTIVE_OPTIONS} onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
+                        <Dropdown value={active} options={ACTIVE_OPTIONS} placeholder="Todos los estados" onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
                     </div>
                     <div className="col-12 lg:col-5 flex align-items-center gap-2">
                         <Checkbox inputId="venues-roots" checked={roots} onChange={(event) => setRoots(Boolean(event.checked))} />

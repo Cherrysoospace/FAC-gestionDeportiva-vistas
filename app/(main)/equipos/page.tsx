@@ -216,7 +216,7 @@ function TeamsContent() {
                         />
                     </div>
                     <div className="col-12 md:col-6 lg:col-3">
-                        <Dropdown value={active} options={ACTIVE_OPTIONS} onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
+                        <Dropdown value={active} options={ACTIVE_OPTIONS} placeholder="Todos los estados" onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
                     </div>
                 </div>
 
