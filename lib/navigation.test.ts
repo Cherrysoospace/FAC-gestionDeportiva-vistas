@@ -38,4 +38,10 @@ describe('getAllowedModules', () => {
 
         expect(allowed.map((module) => module.to)).toEqual(['/jugadores', '/perfil']);
     });
+
+    it('muestra Partidos con GET /gestion-deportiva/matches', () => {
+        const allowed = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/matches');
+
+        expect(allowed.map((module) => module.to)).toEqual(['/partidos', '/perfil']);
+    });
 });

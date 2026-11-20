@@ -697,3 +697,98 @@ export interface TournamentVenueQuery {
     tournamentId?: number;
     venueId?: number;
 }
+
+// ---- Partido (matches/dto/match-response.dto.ts) ----
+
+export interface MatchPhase {
+    id: number;
+    name: string;
+    // GROUP = fase de grupos; FINAL = fase final
+    type: 'GROUP' | 'FINAL';
+    // 'Grupo A', 'Semifinal'...
+    label: string;
+    tournament: { id: number; name: string };
+}
+
+export interface MatchTeam {
+    id: number;
+    name: string;
+}
+
+export interface Match {
+    id: number;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+    status: MatchStatus;
+    // null hasta que se registre el resultado (HU-GC-07)
+    homeScore: number | null;
+    awayScore: number | null;
+    bettingOpen: boolean;
+    phase: MatchPhase;
+    homeTeam: MatchTeam;
+    awayTeam: MatchTeam;
+    venue: { id: number; name: string };
+    ball: { id: number; brand: string; model: string };
+}
+
+export interface CreateMatchPayload {
+    phaseId: number;
+    homeTeamId: number;
+    awayTeamId: number;
+    venueId: number;
+    ballId: number;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+}
+
+// Datos solo mientras está SCHEDULED; status inicia o cancela (FINISHED lo pone el resultado)
+export interface UpdateMatchPayload {
+    homeTeamId?: number;
+    awayTeamId?: number;
+    venueId?: number;
+    ballId?: number;
+    scheduledAt?: string;
+    status?: MatchStatus;
+}
+
+export interface MatchQuery {
+    tournamentId?: number;
+    phaseId?: number;
+    teamId?: number;
+    venueId?: number;
+    status?: MatchStatus;
+}
+
+// ---- Pizarra (match-positions/dto/board-response.dto.ts) ----
+
+export interface BoardPoint {
+    // Porcentaje del campo (0 a 100)
+    x: number;
+    y: number;
+    // Fecha y hora ISO 8601
+    recordedAt: string;
+}
+
+export interface BoardTeam {
+    id: number;
+    name: string;
+    side: 'HOME' | 'AWAY';
+}
+
+export interface BoardPlayer {
+    id: number;
+    fullName: string;
+    position: string;
+    team: BoardTeam;
+    // null = sin posición registrada todavía
+    location: BoardPoint | null;
+}
+
+export interface Board {
+    matchId: number;
+    status: MatchStatus;
+    homeTeam: BoardTeam;
+    awayTeam: BoardTeam;
+    ball: { id: number; brand: string; model: string; location: BoardPoint | null };
+    players: BoardPlayer[];
+}

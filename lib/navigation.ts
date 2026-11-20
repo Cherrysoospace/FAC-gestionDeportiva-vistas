@@ -1,5 +1,6 @@
 import { EndpointRequirement } from '@/types/security';
 import { PERMISSIONS_VIEW_ENDPOINTS, ROLE_PERMISSIONS_VIEW_ENDPOINTS, ROLES_VIEW_ENDPOINTS, USERS_VIEW_ENDPOINTS } from './security-constants';
+import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
 import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
 import { VENUES_VIEW_ENDPOINTS } from './venue-constants';
@@ -79,6 +80,14 @@ export const APP_MODULES: AppModule[] = [
         to: '/jugadores',
         section: 'Gestión deportiva',
         requiredEndpoints: PLAYERS_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Partidos',
+        description: 'Programa los partidos de cada fase y sigue su desarrollo en la pizarra.',
+        icon: 'pi-calendar',
+        to: '/partidos',
+        section: 'Gestión deportiva',
+        requiredEndpoints: MATCHES_VIEW_ENDPOINTS
     },
     {
         label: 'Mi perfil',
