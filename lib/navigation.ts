@@ -1,10 +1,7 @@
 import { EndpointRequirement } from '@/types/security';
-import {
-    PERMISSIONS_VIEW_ENDPOINTS,
-    ROLE_PERMISSIONS_VIEW_ENDPOINTS,
-    ROLES_VIEW_ENDPOINTS,
-    USERS_VIEW_ENDPOINTS
-} from './security-constants';
+import { PERMISSIONS_VIEW_ENDPOINTS, ROLE_PERMISSIONS_VIEW_ENDPOINTS, ROLES_VIEW_ENDPOINTS, USERS_VIEW_ENDPOINTS } from './security-constants';
+import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
+import { VENUES_VIEW_ENDPOINTS } from './venue-constants';
 
 export interface AppModule {
     label: string;
@@ -57,6 +54,22 @@ export const APP_MODULES: AppModule[] = [
         section: 'Gestión deportiva',
         // Permiso de ms-sports, registrado en ms_security con el prefijo /gestion-deportiva
         requiredEndpoints: [{ url: '/gestion-deportiva/tournaments', method: 'GET' }]
+    },
+    {
+        label: 'Equipos',
+        description: 'Registra equipos, sus deportes y los equipos con los que se relacionan.',
+        icon: 'pi-flag',
+        to: '/equipos',
+        section: 'Gestión deportiva',
+        requiredEndpoints: TEAMS_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Escenarios',
+        description: 'Gestiona los escenarios, sus espacios internos y las localidades con su capacidad.',
+        icon: 'pi-building',
+        to: '/escenarios',
+        section: 'Gestión deportiva',
+        requiredEndpoints: VENUES_VIEW_ENDPOINTS
     },
     {
         label: 'Mi perfil',

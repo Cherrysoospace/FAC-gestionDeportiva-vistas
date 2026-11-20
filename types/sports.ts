@@ -297,3 +297,181 @@ export interface RegistrationQuery {
     teamId?: number;
     status?: RegistrationStatus;
 }
+
+// ---- Equipo (teams/dto/team-response.dto.ts) ----
+
+export interface TeamSportSummary {
+    id: number;
+    name: string;
+}
+
+export interface TeamGroup {
+    id: number;
+    groupName: string;
+    tournamentId: number;
+}
+
+export interface Team {
+    id: number;
+    name: string;
+    city: string;
+    modality: TeamModality;
+    active: boolean;
+    // Deportes que juega (team_sports)
+    sports: TeamSportSummary[];
+    // Grupo actual; null = sin grupo
+    group: TeamGroup | null;
+    // Inscripciones en estado ACTIVE
+    activeRegistrationsCount: number;
+    // Jugadores con contrato vigente hoy
+    playersCount: number;
+}
+
+export interface CreateTeamPayload {
+    name: string;
+    city: string;
+    modality: TeamModality;
+}
+
+export interface UpdateTeamPayload {
+    name?: string;
+    city?: string;
+    modality?: TeamModality;
+    active?: boolean;
+}
+
+export interface TeamQuery {
+    search?: string;
+    modality?: TeamModality;
+    active?: boolean;
+    sportId?: number;
+}
+
+// ---- Equipo-Deporte (team-sports/dto/team-sport-response.dto.ts) ----
+
+export interface TeamSportTeam {
+    id: number;
+    name: string;
+    city: string;
+    modality: TeamModality;
+}
+
+export interface TeamSportAssociation {
+    id: number;
+    team: TeamSportTeam;
+    sport: TeamSportSummary;
+}
+
+export interface CreateTeamSportPayload {
+    teamId: number;
+    sportId: number;
+}
+
+export interface TeamSportQuery {
+    teamId?: number;
+    sportId?: number;
+}
+
+// ---- Equipo-Equipo (team-relations/dto/related-team-response.dto.ts) ----
+
+export interface RelatedTeam {
+    id: number;
+    name: string;
+    city: string;
+    modality: TeamModality;
+    active: boolean;
+}
+
+export interface CreateTeamRelationPayload {
+    relatedTeamId: number;
+}
+
+// Respuesta de POST /teams/:id/related-teams
+export interface CreateTeamRelationResult {
+    message: string;
+    relatedTeams: RelatedTeam[];
+}
+
+// ---- Escenario (venues/dto/venue-response.dto.ts) ----
+
+export interface VenueParent {
+    id: number;
+    name: string;
+}
+
+export interface VenueChild {
+    id: number;
+    name: string;
+    active: boolean;
+}
+
+export interface Venue {
+    id: number;
+    name: string;
+    address: string | null;
+    active: boolean;
+    // null = escenario principal
+    parent: VenueParent | null;
+    // Solo en GET /venues/:id (relación cargada)
+    children?: VenueChild[];
+    // Localidades del escenario (activas e inactivas)
+    locationsCount: number;
+    // Suma de la capacidad de las localidades activas
+    totalCapacity: number;
+}
+
+export interface CreateVenuePayload {
+    name: string;
+    address?: string | null;
+    // Ausente o null = escenario principal
+    parentId?: number | null;
+}
+
+export interface UpdateVenuePayload {
+    name?: string;
+    address?: string | null;
+    // undefined = no cambia; null = pasa a ser principal
+    parentId?: number | null;
+    active?: boolean;
+}
+
+export interface VenueQuery {
+    search?: string;
+    parentId?: number;
+    // true = solo escenarios principales
+    roots?: boolean;
+    active?: boolean;
+}
+
+// ---- Localidad (locations/dto/location-response.dto.ts) ----
+
+export interface LocationVenue {
+    id: number;
+    name: string;
+}
+
+export interface Location {
+    id: number;
+    name: string;
+    capacity: number;
+    active: boolean;
+    venue: LocationVenue;
+}
+
+export interface CreateLocationPayload {
+    venueId: number;
+    name: string;
+    capacity: number;
+}
+
+// El escenario no se puede cambiar
+export interface UpdateLocationPayload {
+    name?: string;
+    capacity?: number;
+    active?: boolean;
+}
+
+export interface LocationQuery {
+    venueId?: number;
+    active?: boolean;
+}

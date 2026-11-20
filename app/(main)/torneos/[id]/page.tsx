@@ -21,7 +21,7 @@ import { Tournament, TournamentStatus } from '@/types/sports';
 import { TournamentActiveTag, TournamentStatusTag } from '../components/TournamentBadges';
 import TournamentFormDialog from '../components/TournamentFormDialog';
 import TournamentStatusDialog from '../components/TournamentStatusDialog';
-import { useSportOptions } from '../hooks/useSportOptions';
+import { useSportOptions } from '../../hooks/useSportOptions';
 import { useTournamentDetail } from '../hooks/useTournamentDetail';
 
 interface TournamentDetailPageProps {

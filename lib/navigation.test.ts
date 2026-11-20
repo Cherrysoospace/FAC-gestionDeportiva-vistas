@@ -26,4 +26,10 @@ describe('getAllowedModules', () => {
         expect(allowed.map((module) => module.to)).toEqual(['/torneos', '/perfil']);
         expect(allowed.find((module) => module.to === '/torneos')?.section).toBe('Gestión deportiva');
     });
+
+    it('muestra Equipos y Escenarios solo con su permiso GET de ms-sports', () => {
+        const allowed = getAllowedModules((url, method) => method === 'GET' && ['/gestion-deportiva/teams', '/gestion-deportiva/venues'].includes(url));
+
+        expect(allowed.map((module) => module.to)).toEqual(['/equipos', '/escenarios', '/perfil']);
+    });
 });
