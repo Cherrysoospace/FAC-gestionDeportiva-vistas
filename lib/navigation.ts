@@ -6,6 +6,7 @@ import { FANS_VIEW_ENDPOINTS, MY_FAN_VIEW_ENDPOINTS, MY_FAVORITE_TEAMS_VIEW_ENDP
 import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
 import { MY_PAYMENT_METHODS_VIEW_ENDPOINTS, PAYMENT_METHODS_VIEW_ENDPOINTS } from './payment-method-constants';
 import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
+import { SKILLS_VIEW_ENDPOINTS } from './skill-constants';
 import { SPORTS_VIEW_ENDPOINTS } from './sport-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
 import { MY_TICKETS_VIEW_ENDPOINTS, TICKETS_VIEW_ENDPOINTS } from './ticket-constants';
@@ -80,6 +81,14 @@ export const APP_MODULES: AppModule[] = [
         to: '/pelotas',
         section: 'Gestión deportiva',
         requiredEndpoints: BALLS_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Habilidades',
+        description: 'Administra el catálogo de habilidades que se asignan a los jugadores.',
+        icon: 'pi-bolt',
+        to: '/habilidades',
+        section: 'Gestión deportiva',
+        requiredEndpoints: SKILLS_VIEW_ENDPOINTS
     },
     {
         label: 'Equipos',

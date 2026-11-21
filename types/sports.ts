@@ -621,6 +621,19 @@ export interface SkillQuery {
     category?: SkillCategory;
 }
 
+export interface CreateSkillPayload {
+    name: string;
+    category: SkillCategory;
+    description: string;
+}
+
+// Ningún campo acepta null (columnas NOT NULL): solo se envía lo que cambia
+export interface UpdateSkillPayload {
+    name?: string;
+    category?: SkillCategory;
+    description?: string;
+}
+
 // ---- Habilidad-Jugador (player-skills/dto/player-skill-response.dto.ts) ----
 
 export interface PlayerSkillPlayer {
