@@ -5,6 +5,7 @@ import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
 import { MY_PAYMENT_METHODS_VIEW_ENDPOINTS, PAYMENT_METHODS_VIEW_ENDPOINTS } from './payment-method-constants';
 import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
+import { MY_TICKETS_VIEW_ENDPOINTS, TICKETS_VIEW_ENDPOINTS } from './ticket-constants';
 import { VENUES_VIEW_ENDPOINTS } from './venue-constants';
 
 export interface AppModule {
@@ -125,6 +126,15 @@ export const APP_MODULES: AppModule[] = [
         section: 'Gestión deportiva',
         requiredEndpoints: PAYMENT_METHODS_VIEW_ENDPOINTS,
         alternativeEndpoints: MY_PAYMENT_METHODS_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Boletos',
+        description: 'Consulta el aforo disponible por localidad y gestiona la compra de boletos.',
+        icon: 'pi-ticket',
+        to: '/boletos',
+        section: 'Gestión deportiva',
+        requiredEndpoints: TICKETS_VIEW_ENDPOINTS,
+        alternativeEndpoints: MY_TICKETS_VIEW_ENDPOINTS
     },
     {
         label: 'Mi perfil',

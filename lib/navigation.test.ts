@@ -70,4 +70,12 @@ describe('getAllowedModules', () => {
         expect(asAdmin.map((module) => module.to)).toEqual(['/metodos-pago', '/perfil']);
         expect(asFan.map((module) => module.to)).toEqual(['/metodos-pago', '/perfil']);
     });
+
+    it('muestra Boletos con permiso administrativo o de compra propia', () => {
+        const asAdmin = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/tickets');
+        const asFan = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/me/tickets');
+
+        expect(asAdmin.map((module) => module.to)).toEqual(['/boletos', '/perfil']);
+        expect(asFan.map((module) => module.to)).toEqual(['/boletos', '/perfil']);
+    });
 });
