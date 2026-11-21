@@ -12,20 +12,30 @@ import EmptyState from '@/components/ui/EmptyState';
 import PageHeader from '@/components/ui/PageHeader';
 import { useAuth } from '@/layout/context/authcontext';
 import ProtectedRoute from '@/layout/ProtectedRoute';
-import { SPORTS_LIST_ENDPOINT, TOURNAMENT_DETAIL_ENDPOINTS, TOURNAMENT_UPDATE_ENDPOINT } from '@/lib/tournament-constants';
+import {
+    REGISTRATION_CREATE_ENDPOINT,
+    REGISTRATION_WITHDRAW_ENDPOINT,
+    REGISTRATIONS_LIST_ENDPOINT,
+    SPORTS_LIST_ENDPOINT,
+    TOURNAMENT_DETAIL_ENDPOINTS,
+    TOURNAMENT_UPDATE_ENDPOINT
+} from '@/lib/tournament-constants';
+import { TEAM_DETAIL_ENDPOINTS, TEAMS_VIEW_ENDPOINTS } from '@/lib/team-constants';
 import { toUpdatePayload, TournamentActionResult, TournamentFormValues } from '@/lib/tournament-form';
 import { allowedTransitions, formatDateTime, formatDay, TOURNAMENT_STATUS_LABELS } from '@/lib/tournament-labels';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
-import { Tournament, TournamentStatus, TournamentVenue } from '@/types/sports';
+import { Registration, Tournament, TournamentStatus, TournamentVenue } from '@/types/sports';
 import { TOURNAMENT_VENUE_CREATE_ENDPOINT, TOURNAMENT_VENUE_DELETE_ENDPOINT, TOURNAMENT_VENUES_LIST_ENDPOINT, VENUE_DETAIL_ENDPOINTS, VENUES_VIEW_ENDPOINTS } from '@/lib/venue-constants';
 import { TournamentActiveTag, TournamentStatusTag } from '../components/TournamentBadges';
 import TournamentFormDialog from '../components/TournamentFormDialog';
+import TournamentRegistrationsPanel from '../components/TournamentRegistrationsPanel';
 import TournamentStatusDialog from '../components/TournamentStatusDialog';
 import TournamentVenuesPanel from '../components/TournamentVenuesPanel';
 import { useSportOptions } from '../../hooks/useSportOptions';
 import { useVenueOptions } from '../../hooks/useVenueOptions';
 import { useTournamentDetail } from '../hooks/useTournamentDetail';
+import { useTournamentRegistrations } from '../hooks/useTournamentRegistrations';
 import { useTournamentVenues } from '../hooks/useTournamentVenues';
 
 interface TournamentDetailPageProps {
@@ -60,6 +70,13 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
     const tournamentVenues = useTournamentVenues(tournamentId, canListTournamentVenues);
     const { venues } = useVenueOptions(canEnableVenue);
 
+    // Pestaña Inscripciones (HU-GC-03)
+    const canListRegistrations = can(REGISTRATIONS_LIST_ENDPOINT);
+    const canCreateRegistration = can(REGISTRATION_CREATE_ENDPOINT, ...TEAMS_VIEW_ENDPOINTS);
+    const canWithdrawRegistration = can(REGISTRATION_WITHDRAW_ENDPOINT);
+    const canViewTeam = can(...TEAM_DETAIL_ENDPOINTS);
+    const tournamentRegistrations = useTournamentRegistrations(tournamentId, tournament?.sport.id ?? null, canListRegistrations, canCreateRegistration);
+
     const handleEnableVenue = async (venueId: number) => {
         const result = await tournamentVenues.enable(venueId);
         const name = venues.find((venue) => venue.id === venueId)?.name ?? 'El escenario';
@@ -70,6 +87,25 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
     const handleRemoveVenue = async (tournamentVenue: TournamentVenue) => {
         const result = await tournamentVenues.remove(tournamentVenue.id);
         notify(result, `Se retiró ${tournamentVenue.venue.name} de los escenarios del torneo.`, 'No se pudo retirar el escenario');
+    };
+
+    const handleEnrollTeams = async (teamIds: number[]) => {
+        let successMessage = teamIds.length === 1 ? 'Equipo inscrito correctamente.' : `${teamIds.length} equipos inscritos correctamente.`;
+        const result = await tournamentRegistrations.enroll(teamIds, (message) => {
+            successMessage = message;
+        });
+        notify(result, successMessage, 'No se pudo completar la inscripción');
+        if (result.ok) reload();
+        return result.ok;
+    };
+
+    const handleWithdrawRegistration = async (registration: Registration) => {
+        let successMessage = `Se retiró la inscripción de ${registration.team.name}.`;
+        const result = await tournamentRegistrations.withdraw(registration.id, (message) => {
+            successMessage = message;
+        });
+        notify(result, successMessage, 'No se pudo retirar la inscripción');
+        if (result.ok) reload();
     };
 
     const notify = (result: ActionResult, successText: string, errorSummary = 'No se pudo completar') =>
@@ -130,7 +166,23 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
                             <ComingSoon />
                         </TabPanel>
                         <TabPanel header="Inscripciones">
-                            <ComingSoon />
+                            {canListRegistrations ? (
+                                <TournamentRegistrationsPanel
+                                    registrations={tournamentRegistrations.registrations}
+                                    teams={tournamentRegistrations.teams}
+                                    sportName={tournament.sport.name}
+                                    loading={tournamentRegistrations.loading}
+                                    error={tournamentRegistrations.error}
+                                    canOpenRegistration={tournament.status === 'REGISTRATION_OPEN'}
+                                    canCreate={canCreateRegistration}
+                                    canWithdraw={canWithdrawRegistration}
+                                    canViewTeam={canViewTeam}
+                                    onEnroll={handleEnrollTeams}
+                                    onWithdraw={handleWithdrawRegistration}
+                                />
+                            ) : (
+                                <EmptyState icon="pi-lock" title="No tienes permiso para consultar las inscripciones del torneo." />
+                            )}
                         </TabPanel>
                         <TabPanel header="Escenarios">
                             {canListTournamentVenues ? (

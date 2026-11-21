@@ -16,3 +16,12 @@ export const TOURNAMENT_UPDATE_ENDPOINT: EndpointRequirement = { url: `${TOURNAM
 export const TOURNAMENT_DELETE_ENDPOINT: EndpointRequirement = { url: `${TOURNAMENTS}/{id}`, method: 'DELETE' };
 
 export const SPORTS_LIST_ENDPOINT: EndpointRequirement = { url: `${SPORTS_PERMISSION_PREFIX}/sports`, method: 'GET' };
+
+// Inscripciones del torneo (HU-GC-03)
+const REGISTRATIONS = `${SPORTS_PERMISSION_PREFIX}/registrations`;
+
+export const REGISTRATIONS_LIST_ENDPOINT: EndpointRequirement = { url: REGISTRATIONS, method: 'GET' };
+
+export const REGISTRATION_CREATE_ENDPOINT: EndpointRequirement = { url: REGISTRATIONS, method: 'POST' };
+
+export const REGISTRATION_WITHDRAW_ENDPOINT: EndpointRequirement = { url: `${REGISTRATIONS}/{id}/withdraw`, method: 'PATCH' };

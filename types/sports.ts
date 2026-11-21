@@ -792,3 +792,392 @@ export interface Board {
     ball: { id: number; brand: string; model: string; location: BoardPoint | null };
     players: BoardPlayer[];
 }
+
+// ---- Resultado final de partido (matches/dto/record-match-result.dto.ts) ----
+
+export interface RecordMatchResultPayload {
+    homeScore: number;
+    awayScore: number;
+}
+
+// ---- Anotaciones / Goles (goals/dto/*) ----
+
+export interface GoalTeamRef {
+    id: number;
+    name: string;
+}
+
+export interface GoalMatchSummary {
+    id: number;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+    status: MatchStatus;
+    homeTeam: GoalTeamRef;
+    awayTeam: GoalTeamRef;
+}
+
+export interface GoalPlayerSummary {
+    id: number;
+    fullName: string;
+    documentNumber: string;
+    position: string;
+}
+
+export interface Goal {
+    id: number;
+    minute: number;
+    points: number;
+    description: string | null;
+    // Fecha y hora ISO 8601
+    recordedAt: string;
+    match: GoalMatchSummary;
+    player: GoalPlayerSummary;
+}
+
+export interface CreateGoalPayload {
+    matchId: number;
+    playerId: number;
+    minute: number;
+    points?: number;
+    description?: string | null;
+}
+
+export interface UpdateGoalPayload {
+    playerId?: number;
+    minute?: number;
+    points?: number;
+    description?: string | null;
+}
+
+export interface GoalQuery {
+    matchId?: number;
+    playerId?: number;
+    tournamentId?: number;
+}
+
+// ---- Aficionados y Equipos Favoritos (fans/dto/*) ----
+
+export interface Fan {
+    id: number;
+    securityUserId: number;
+    fullName: string;
+    documentNumber: string;
+    email: string;
+    phone: string | null;
+    active: boolean;
+    // Fecha y hora ISO 8601
+    createdAt: string;
+    favoriteTeamsCount: number;
+}
+
+export interface CreateFanPayload {
+    securityUserId: number;
+    fullName: string;
+    documentNumber: string;
+    email: string;
+    phone?: string | null;
+}
+
+export interface UpdateFanPayload {
+    fullName?: string;
+    documentNumber?: string;
+    email?: string;
+    phone?: string | null;
+    active?: boolean;
+}
+
+export interface RegisterMyFanPayload {
+    fullName: string;
+    documentNumber: string;
+    email?: string;
+    phone?: string | null;
+}
+
+export interface UpdateMyFanPayload {
+    fullName?: string;
+    documentNumber?: string;
+    email?: string;
+    phone?: string | null;
+}
+
+export interface FanQuery {
+    search?: string;
+    active?: boolean;
+}
+
+export interface FavoriteTeamSummary {
+    id: number;
+    name: string;
+    city: string;
+    modality: TeamModality;
+    active: boolean;
+}
+
+export interface FavoriteTeam {
+    id: number;
+    // Fecha y hora ISO 8601
+    createdAt: string;
+    team: FavoriteTeamSummary;
+}
+
+export interface AddFavoriteTeamPayload {
+    teamId: number;
+}
+
+// ---- Métodos de Pago (payment-methods/dto/* y enums/payment-method-type.enum.ts) ----
+
+export type PaymentMethodType = 'CARD' | 'PSE' | 'DIGITAL_WALLET' | 'BANK_TRANSFER';
+
+export interface PaymentMethod {
+    id: number;
+    name: string;
+    type: PaymentMethodType;
+    description: string | null;
+    active: boolean;
+    fanPaymentMethodsCount: number;
+}
+
+export interface CreatePaymentMethodPayload {
+    name: string;
+    type: PaymentMethodType;
+    description?: string | null;
+}
+
+export interface UpdatePaymentMethodPayload {
+    name?: string;
+    type?: PaymentMethodType;
+    description?: string | null;
+    active?: boolean;
+}
+
+export interface PaymentMethodQuery {
+    type?: PaymentMethodType;
+    active?: boolean;
+    search?: string;
+}
+
+export interface FanPaymentMethodCatalog {
+    id: number;
+    name: string;
+    type: PaymentMethodType;
+    active: boolean;
+}
+
+export interface FanPaymentMethod {
+    id: number;
+    alias: string;
+    reference: string;
+    details: Record<string, unknown>;
+    active: boolean;
+    // Fecha y hora ISO 8601
+    createdAt: string;
+    fanId: number;
+    paymentMethod: FanPaymentMethodCatalog;
+}
+
+export interface RegisterFanPaymentMethodPayload {
+    paymentMethodId: number;
+    alias: string;
+    reference: string;
+    details: Record<string, unknown>;
+}
+
+export interface UpdateFanPaymentMethodPayload {
+    alias?: string;
+    reference?: string;
+    details?: Record<string, unknown>;
+    active?: boolean;
+}
+
+export interface FanPaymentMethodQuery {
+    active?: boolean;
+}
+
+// ---- Boletos (tickets/dto/*) ----
+
+export interface TicketMatchSummary {
+    id: number;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+    status: MatchStatus;
+    homeTeamName: string;
+    awayTeamName: string;
+    venueId: number;
+    venueName: string;
+}
+
+export interface TicketLocationSummary {
+    id: number;
+    name: string;
+    capacity: number;
+}
+
+export interface TicketFanSummary {
+    id: number;
+    fullName: string;
+    documentNumber: string;
+    email: string;
+}
+
+export interface Ticket {
+    id: number;
+    code: string;
+    price: number;
+    // Fecha y hora ISO 8601
+    purchasedAt: string;
+    match: TicketMatchSummary;
+    location: TicketLocationSummary;
+    fan: TicketFanSummary;
+}
+
+export interface PurchaseTicketPayload {
+    matchId: number;
+    locationId: number;
+    price?: number;
+}
+
+export interface CreateTicketPayload {
+    fanId: number;
+    matchId: number;
+    locationId: number;
+    price?: number;
+}
+
+export interface TicketQuery {
+    matchId?: number;
+    fanId?: number;
+    locationId?: number;
+    tournamentId?: number;
+    code?: string;
+}
+
+export interface MyTicketQuery {
+    matchId?: number;
+    locationId?: number;
+    tournamentId?: number;
+}
+
+export interface LocationAvailability {
+    locationId: number;
+    locationName: string;
+    active: boolean;
+    capacity: number;
+    sold: number;
+    available: number;
+    soldOut: boolean;
+}
+
+export interface MatchTicketAvailability {
+    matchId: number;
+    matchStatus: MatchStatus;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+    venueId: number;
+    venueName: string;
+    totalCapacity: number;
+    totalSold: number;
+    totalAvailable: number;
+    locations: LocationAvailability[];
+}
+
+// ---- Apuestas (bets/dto/* y enums/*) ----
+
+export type BetSelection = 'HOME_WIN' | 'DRAW' | 'AWAY_WIN';
+
+export type BetStatus = 'PENDING' | 'WON' | 'LOST' | 'VOID' | 'CANCELLED';
+
+export interface BetMatchSummary {
+    id: number;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+    status: MatchStatus;
+    bettingOpen: boolean;
+    homeScore: number | null;
+    awayScore: number | null;
+    homeTeamName: string;
+    awayTeamName: string;
+    venueName: string;
+    tournamentId: number;
+    tournamentName: string;
+}
+
+export interface BetFanSummary {
+    id: number;
+    fullName: string;
+    documentNumber: string;
+    email: string;
+}
+
+export interface BetPaymentMethodSummary {
+    id: number;
+    alias: string;
+    reference: string;
+    paymentMethodId: number;
+    paymentMethodName: string;
+    paymentMethodType: PaymentMethodType;
+}
+
+export interface Bet {
+    id: number;
+    selection: BetSelection;
+    amount: number;
+    odds: number;
+    potentialPayout: number;
+    status: BetStatus;
+    payout: number | null;
+    // Fecha y hora ISO 8601
+    placedAt: string;
+    // Fecha y hora ISO 8601
+    settledAt: string | null;
+    settlementNote: string | null;
+    match: BetMatchSummary;
+    fan: BetFanSummary;
+    paymentMethod: BetPaymentMethodSummary;
+}
+
+export interface PlaceBetPayload {
+    matchId: number;
+    fanPaymentMethodId: number;
+    selection: BetSelection;
+    amount: number;
+    odds: number;
+}
+
+export interface CreateBetPayload {
+    fanId: number;
+    matchId: number;
+    fanPaymentMethodId: number;
+    selection: BetSelection;
+    amount: number;
+    odds: number;
+}
+
+export interface UpdateMyBetPayload {
+    fanPaymentMethodId?: number;
+    selection?: BetSelection;
+    amount?: number;
+}
+
+export interface CancelBetPayload {
+    reason?: string;
+}
+
+export interface BetQuery {
+    matchId?: number;
+    fanId?: number;
+    status?: BetStatus;
+    tournamentId?: number;
+}
+
+export interface MyBetQuery {
+    matchId?: number;
+    status?: BetStatus;
+    tournamentId?: number;
+}
+
+export interface AvailableBetMatchesQuery {
+    tournamentId?: number;
+    phaseId?: number;
+    teamId?: number;
+    venueId?: number;
+}
