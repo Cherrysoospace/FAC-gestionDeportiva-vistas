@@ -27,6 +27,21 @@ import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Registration, Tournament, TournamentStatus, TournamentVenue } from '@/types/sports';
 import { TOURNAMENT_VENUE_CREATE_ENDPOINT, TOURNAMENT_VENUE_DELETE_ENDPOINT, TOURNAMENT_VENUES_LIST_ENDPOINT, VENUE_DETAIL_ENDPOINTS, VENUES_VIEW_ENDPOINTS } from '@/lib/venue-constants';
+import {
+    FINAL_PHASE_CREATE_ENDPOINT,
+    FINAL_PHASE_DELETE_ENDPOINT,
+    FINAL_PHASE_UPDATE_ENDPOINT,
+    FINAL_PHASES_LIST_ENDPOINT,
+    GROUP_PHASE_CREATE_ENDPOINT,
+    GROUP_PHASE_DELETE_ENDPOINT,
+    GROUP_PHASE_UPDATE_ENDPOINT,
+    GROUP_PHASES_LIST_ENDPOINT,
+    GROUP_TEAM_ASSIGN_ENDPOINT,
+    GROUP_TEAM_REMOVE_ENDPOINT,
+    GROUP_TEAMS_LIST_ENDPOINT
+} from '@/lib/phase-constants';
+import FinalPhasesPanel from '../components/FinalPhasesPanel';
+import GroupPhasesPanel from '../components/GroupPhasesPanel';
 import { TournamentActiveTag, TournamentStatusTag } from '../components/TournamentBadges';
 import TournamentFormDialog from '../components/TournamentFormDialog';
 import TournamentRegistrationsPanel from '../components/TournamentRegistrationsPanel';
@@ -76,6 +91,19 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
     const canWithdrawRegistration = can(REGISTRATION_WITHDRAW_ENDPOINT);
     const canViewTeam = can(...TEAM_DETAIL_ENDPOINTS);
     const tournamentRegistrations = useTournamentRegistrations(tournamentId, tournament?.sport.id ?? null, canListRegistrations, canCreateRegistration);
+
+    // Pestañas Grupos y Fases finales (Fase de grupos / Fase final del diagrama)
+    const canListGroupPhases = can(GROUP_PHASES_LIST_ENDPOINT);
+    const canCreateGroupPhase = can(GROUP_PHASE_CREATE_ENDPOINT);
+    const canUpdateGroupPhase = can(GROUP_PHASE_UPDATE_ENDPOINT);
+    const canDeleteGroupPhase = can(GROUP_PHASE_DELETE_ENDPOINT);
+    const canListGroupTeams = can(GROUP_TEAMS_LIST_ENDPOINT);
+    const canAssignGroupTeam = can(GROUP_TEAM_ASSIGN_ENDPOINT);
+    const canRemoveGroupTeam = can(GROUP_TEAM_REMOVE_ENDPOINT);
+    const canListFinalPhases = can(FINAL_PHASES_LIST_ENDPOINT);
+    const canCreateFinalPhase = can(FINAL_PHASE_CREATE_ENDPOINT);
+    const canUpdateFinalPhase = can(FINAL_PHASE_UPDATE_ENDPOINT);
+    const canDeleteFinalPhase = can(FINAL_PHASE_DELETE_ENDPOINT);
 
     const handleEnableVenue = async (venueId: number) => {
         const result = await tournamentVenues.enable(venueId);
@@ -162,8 +190,30 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
                         <TabPanel header="Información">
                             <TournamentInfo tournament={tournament} />
                         </TabPanel>
+                        <TabPanel header="Grupos">
+                            {canListGroupPhases ? (
+                                <GroupPhasesPanel
+                                    tournament={tournament}
+                                    canCreate={canCreateGroupPhase}
+                                    canUpdate={canUpdateGroupPhase}
+                                    canDelete={canDeleteGroupPhase}
+                                    canListTeams={canListGroupTeams}
+                                    canAssignTeam={canAssignGroupTeam}
+                                    canRemoveTeam={canRemoveGroupTeam}
+                                    canListRegistrations={canListRegistrations}
+                                    notify={notify}
+                                    onChanged={reload}
+                                />
+                            ) : (
+                                <EmptyState icon="pi-lock" title="No tienes permiso para consultar los grupos del torneo." />
+                            )}
+                        </TabPanel>
                         <TabPanel header="Fases finales">
-                            <ComingSoon />
+                            {canListFinalPhases ? (
+                                <FinalPhasesPanel tournament={tournament} canCreate={canCreateFinalPhase} canUpdate={canUpdateFinalPhase} canDelete={canDeleteFinalPhase} notify={notify} onChanged={reload} />
+                            ) : (
+                                <EmptyState icon="pi-lock" title="No tienes permiso para consultar las fases finales del torneo." />
+                            )}
                         </TabPanel>
                         <TabPanel header="Inscripciones">
                             {canListRegistrations ? (
@@ -234,8 +284,4 @@ function TournamentInfo({ tournament }: { tournament: Tournament }) {
             ))}
         </ul>
     );
-}
-
-function ComingSoon() {
-    return <EmptyState icon="pi-clock" title="Disponible próximamente" description="Esta sección se habilitará en una próxima versión." />;
 }
