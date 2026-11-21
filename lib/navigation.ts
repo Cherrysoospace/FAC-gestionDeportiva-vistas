@@ -1,5 +1,6 @@
 import { EndpointRequirement } from '@/types/security';
 import { PERMISSIONS_VIEW_ENDPOINTS, ROLE_PERMISSIONS_VIEW_ENDPOINTS, ROLES_VIEW_ENDPOINTS, USERS_VIEW_ENDPOINTS } from './security-constants';
+import { BALLS_VIEW_ENDPOINTS } from './ball-constants';
 import { BETS_VIEW_ENDPOINTS, MY_BETS_VIEW_ENDPOINTS } from './bet-constants';
 import { FANS_VIEW_ENDPOINTS, MY_FAN_VIEW_ENDPOINTS, MY_FAVORITE_TEAMS_VIEW_ENDPOINTS } from './fan-constants';
 import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
@@ -71,6 +72,14 @@ export const APP_MODULES: AppModule[] = [
         to: '/deportes',
         section: 'Gestión deportiva',
         requiredEndpoints: SPORTS_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Pelotas',
+        description: 'Administra el catálogo de pelotas y consulta su asignación a partidos.',
+        icon: 'pi-circle',
+        to: '/pelotas',
+        section: 'Gestión deportiva',
+        requiredEndpoints: BALLS_VIEW_ENDPOINTS
     },
     {
         label: 'Equipos',
