@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { describeError } from '@/lib/api-errors';
 import { runFormAction } from '@/lib/form-action';
-import { createMatch, deleteMatch, listMatches, updateMatch } from '@/lib/matches-api';
-import { CreateMatchPayload, Match, MatchStatus, UpdateMatchPayload } from '@/types/sports';
+import { createMatch, deleteMatch, listMatches, recordMatchResult, updateMatch } from '@/lib/matches-api';
+import { CreateMatchPayload, Match, MatchStatus, RecordMatchResultPayload, UpdateMatchPayload } from '@/types/sports';
 
 export interface MatchFilters {
     tournamentId: number | null;
@@ -55,6 +55,11 @@ export function useMatches({ tournamentId, status }: MatchFilters) {
 
     const changeStatus = useCallback((id: number, next: MatchStatus) => update(id, { status: next }), [update]);
 
+    const recordResult = useCallback(
+        (id: number, payload: RecordMatchResultPayload) => runFormAction(async () => replaceLocal(await recordMatchResult(id, payload))),
+        [replaceLocal]
+    );
+
     const remove = useCallback(
         (id: number) =>
             runFormAction(async () => {
@@ -64,5 +69,5 @@ export function useMatches({ tournamentId, status }: MatchFilters) {
         []
     );
 
-    return { matches, loading, error, reload, create, update, changeStatus, remove };
+    return { matches, loading, error, reload, create, update, changeStatus, recordResult, remove };
 }

@@ -14,6 +14,19 @@ export const MATCH_UPDATE_ENDPOINT: EndpointRequirement = { url: `${MATCHES}/{id
 
 export const MATCH_DELETE_ENDPOINT: EndpointRequirement = { url: `${MATCHES}/{id}`, method: 'DELETE' };
 
+// HU-GC-07: resultado final y anotaciones
+export const MATCH_RECORD_RESULT_ENDPOINT: EndpointRequirement = { url: `${MATCHES}/{id}/result`, method: 'PUT' };
+
+const GOALS = `${SPORTS_PERMISSION_PREFIX}/goals`;
+
+export const GOALS_LIST_ENDPOINT: EndpointRequirement = { url: GOALS, method: 'GET' };
+
+export const GOAL_CREATE_ENDPOINT: EndpointRequirement = { url: GOALS, method: 'POST' };
+
+export const GOAL_UPDATE_ENDPOINT: EndpointRequirement = { url: `${GOALS}/{id}`, method: 'PATCH' };
+
+export const GOAL_DELETE_ENDPOINT: EndpointRequirement = { url: `${GOALS}/{id}`, method: 'DELETE' };
+
 // HU-GC-09: la pizarra necesita el partido y sus posiciones
 export const BOARD_VIEW_ENDPOINTS: EndpointRequirement[] = [
     { url: `${MATCHES}/{id}`, method: 'GET' },

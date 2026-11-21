@@ -1,5 +1,5 @@
 import { sportsApiFetch, toQueryString } from './sports-api';
-import { Board, CreateMatchPayload, Match, MatchQuery, MessageResponse, UpdateMatchPayload } from '@/types/sports';
+import { Board, CreateMatchPayload, Match, MatchQuery, MessageResponse, RecordMatchResultPayload, UpdateMatchPayload } from '@/types/sports';
 
 const MATCHES = '/matches';
 
@@ -28,6 +28,14 @@ export function updateMatch(id: number, payload: UpdateMatchPayload): Promise<Ma
 
 export function deleteMatch(id: number): Promise<MessageResponse> {
     return sportsApiFetch<MessageResponse>(`${MATCHES}/${id}`, { method: 'DELETE' });
+}
+
+// HU-GC-07: registra o corrige el marcador final y pasa el partido a FINISHED
+export function recordMatchResult(id: number, payload: RecordMatchResultPayload): Promise<Match> {
+    return sportsApiFetch<Match>(`${MATCHES}/${id}/result`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+    });
 }
 
 // HU-GC-09: última posición de cada participante y de la pelota

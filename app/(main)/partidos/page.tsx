@@ -16,16 +16,42 @@ import PageHeader from '@/components/ui/PageHeader';
 import { useAuth } from '@/layout/context/authcontext';
 import ProtectedRoute from '@/layout/ProtectedRoute';
 import { FormActionResult } from '@/lib/form-action';
-import { BOARD_VIEW_ENDPOINTS, MATCH_CREATE_ENDPOINT, MATCH_DELETE_ENDPOINT, MATCH_FORM_ENDPOINTS, MATCH_UPDATE_ENDPOINT, MATCHES_VIEW_ENDPOINTS } from '@/lib/match-constants';
+import {
+    BOARD_VIEW_ENDPOINTS,
+    GOAL_CREATE_ENDPOINT,
+    GOAL_DELETE_ENDPOINT,
+    GOAL_UPDATE_ENDPOINT,
+    GOALS_LIST_ENDPOINT,
+    MATCH_CREATE_ENDPOINT,
+    MATCH_DELETE_ENDPOINT,
+    MATCH_FORM_ENDPOINTS,
+    MATCH_RECORD_RESULT_ENDPOINT,
+    MATCH_UPDATE_ENDPOINT,
+    MATCHES_VIEW_ENDPOINTS
+} from '@/lib/match-constants';
 import { MatchFormValues, toCreateMatchPayload, toUpdateMatchPayload } from '@/lib/match-form';
-import { canCancelMatch, canDeleteMatch, canEditMatch, canStartMatch, formatScore, MATCH_STATUS_LABELS, MATCH_STATUS_OPTIONS, MATCH_STATUS_SEVERITY } from '@/lib/match-labels';
+import {
+    canCancelMatch,
+    canDeleteMatch,
+    canEditMatch,
+    canRecordResult,
+    canStartMatch,
+    canViewMatchGoals,
+    formatScore,
+    MATCH_STATUS_LABELS,
+    MATCH_STATUS_OPTIONS,
+    MATCH_STATUS_SEVERITY
+} from '@/lib/match-labels';
+import { TEAM_PLAYERS_LIST_ENDPOINT } from '@/lib/player-constants';
 import { TOURNAMENTS_VIEW_ENDPOINTS } from '@/lib/tournament-constants';
 import { formatDateTime } from '@/lib/tournament-labels';
 import { listTournaments } from '@/lib/tournaments-api';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
-import { Match, MatchStatus, Tournament } from '@/types/sports';
+import { Match, MatchStatus, RecordMatchResultPayload, Tournament } from '@/types/sports';
 import MatchFormDialog from './components/MatchFormDialog';
+import MatchGoalsDialog from './components/MatchGoalsDialog';
+import MatchResultDialog from './components/MatchResultDialog';
 import { useMatches } from './hooks/useMatches';
 
 const SKELETON_ROWS = Array.from({ length: 5 }, (_, index) => ({ id: -(index + 1) } as Match));
@@ -47,6 +73,8 @@ function MatchesContent() {
     const [tournamentId, setTournamentId] = useState<number | null>(null);
     const [status, setStatus] = useState<MatchStatus | null>(null);
     const [dialog, setDialog] = useState<DialogState>({ visible: false, match: null });
+    const [resultMatch, setResultMatch] = useState<Match | null>(null);
+    const [goalsMatch, setGoalsMatch] = useState<Match | null>(null);
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
     const can = (...endpoints: EndpointRequirement[]) => endpoints.every((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method));
@@ -55,9 +83,15 @@ function MatchesContent() {
     const canEdit = canUpdate && can(...MATCH_FORM_ENDPOINTS);
     const canDelete = can(MATCH_DELETE_ENDPOINT);
     const canViewBoard = can(...BOARD_VIEW_ENDPOINTS);
+    const canRecordMatchResult = can(MATCH_RECORD_RESULT_ENDPOINT);
+    const canViewGoals = can(GOALS_LIST_ENDPOINT);
+    const canCreateGoal = can(GOAL_CREATE_ENDPOINT);
+    const canUpdateGoal = can(GOAL_UPDATE_ENDPOINT);
+    const canDeleteGoal = can(GOAL_DELETE_ENDPOINT);
+    const canLoadTeamPlayers = can(TEAM_PLAYERS_LIST_ENDPOINT);
     const canListTournaments = can(...TOURNAMENTS_VIEW_ENDPOINTS);
 
-    const { matches, loading, error, reload, create, update, changeStatus, remove } = useMatches({ tournamentId, status });
+    const { matches, loading, error, reload, create, update, changeStatus, recordResult, remove } = useMatches({ tournamentId, status });
 
     // Filtro por torneo
     useEffect(() => {
@@ -77,6 +111,15 @@ function MatchesContent() {
         const editing = dialog.match;
         const result = editing ? await update(editing.id, toUpdateMatchPayload(values, editing)) : await create(toCreateMatchPayload(values));
         if (result.ok) notify(result, editing ? 'Partido actualizado.' : 'Partido programado.');
+        return result;
+    };
+
+    const handleRecordResult = async (matchId: number, payload: RecordMatchResultPayload): Promise<FormActionResult> => {
+        const wasFinished = resultMatch?.status === 'FINISHED';
+        const result = await recordResult(matchId, payload);
+        if (result.ok) {
+            notify(result, wasFinished ? 'Marcador actualizado correctamente.' : 'Resultado final registrado y partido finalizado.');
+        }
         return result;
     };
 
@@ -139,6 +182,21 @@ function MatchesContent() {
         return (
             <div className="flex gap-1">
                 {canViewBoard && <Button icon="pi pi-map" rounded text tooltip="Pizarra" tooltipOptions={{ position: 'top' }} aria-label="Ver pizarra" onClick={() => router.push(`/partidos/${match.id}/pizarra`)} />}
+                {canViewGoals && canViewMatchGoals(match.status) && (
+                    <Button icon="pi pi-list" rounded text tooltip="Anotaciones" tooltipOptions={{ position: 'top' }} aria-label="Ver anotaciones del partido" onClick={() => setGoalsMatch(match)} />
+                )}
+                {canRecordMatchResult && canRecordResult(match.status) && (
+                    <Button
+                        icon="pi pi-check-circle"
+                        rounded
+                        text
+                        severity="help"
+                        tooltip={match.status === 'FINISHED' ? 'Corregir resultado' : 'Registrar resultado final'}
+                        tooltipOptions={{ position: 'top' }}
+                        aria-label="Registrar resultado final"
+                        onClick={() => setResultMatch(match)}
+                    />
+                )}
                 {canEdit && canEditMatch(match.status) && <Button icon="pi pi-pencil" rounded text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar partido" onClick={() => setDialog({ visible: true, match })} />}
                 {canUpdate && canStartMatch(match.status) && (
                     <Button icon="pi pi-play" rounded text severity="success" tooltip="Iniciar" tooltipOptions={{ position: 'top' }} aria-label="Iniciar partido" onClick={() => confirmStatus(match, 'IN_PROGRESS')} />
@@ -211,11 +269,23 @@ function MatchesContent() {
                     <Column header="Partido" body={teamsBody} />
                     <Column header="Escenario" body={venueBody} />
                     <Column header="Estado" body={statusBody} />
-                    <Column header="Acciones" body={actionsBody} headerClassName="w-12rem" />
+                    <Column header="Acciones" body={actionsBody} headerClassName="w-15rem" />
                 </DataTable>
             </div>
 
             <MatchFormDialog visible={dialog.visible} match={dialog.match} onHide={() => setDialog({ visible: false, match: null })} onSubmit={handleSubmit} />
+            <MatchResultDialog visible={resultMatch !== null} match={resultMatch} onHide={() => setResultMatch(null)} onSubmit={handleRecordResult} />
+            <MatchGoalsDialog
+                visible={goalsMatch !== null}
+                match={goalsMatch}
+                canViewGoals={canViewGoals}
+                canCreateGoal={canCreateGoal}
+                canUpdateGoal={canUpdateGoal}
+                canDeleteGoal={canDeleteGoal}
+                canLoadPlayers={canLoadTeamPlayers}
+                onHide={() => setGoalsMatch(null)}
+                onNotify={notify}
+            />
         </>
     );
 }
