@@ -78,4 +78,12 @@ describe('getAllowedModules', () => {
         expect(asAdmin.map((module) => module.to)).toEqual(['/boletos', '/perfil']);
         expect(asFan.map((module) => module.to)).toEqual(['/boletos', '/perfil']);
     });
+
+    it('muestra Apuestas con permiso administrativo o de apuestas propias', () => {
+        const asAdmin = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/bets');
+        const asFan = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/me/bets');
+
+        expect(asAdmin.map((module) => module.to)).toEqual(['/apuestas', '/perfil']);
+        expect(asFan.map((module) => module.to)).toEqual(['/apuestas', '/perfil']);
+    });
 });
