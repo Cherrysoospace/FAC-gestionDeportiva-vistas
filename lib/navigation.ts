@@ -2,6 +2,7 @@ import { EndpointRequirement } from '@/types/security';
 import { PERMISSIONS_VIEW_ENDPOINTS, ROLE_PERMISSIONS_VIEW_ENDPOINTS, ROLES_VIEW_ENDPOINTS, USERS_VIEW_ENDPOINTS } from './security-constants';
 import { FANS_VIEW_ENDPOINTS, MY_FAN_VIEW_ENDPOINTS, MY_FAVORITE_TEAMS_VIEW_ENDPOINTS } from './fan-constants';
 import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
+import { MY_PAYMENT_METHODS_VIEW_ENDPOINTS, PAYMENT_METHODS_VIEW_ENDPOINTS } from './payment-method-constants';
 import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
 import { VENUES_VIEW_ENDPOINTS } from './venue-constants';
@@ -14,6 +15,8 @@ export interface AppModule {
     section: 'Seguridad' | 'Gestión deportiva' | 'Cuenta';
     /** Endpoints que el usuario debe tener todos para ver el módulo. Vacío = cualquier usuario autenticado. */
     requiredEndpoints: EndpointRequirement[];
+    /** Endpoints alternativos: si se cumple al menos uno, también habilita la entrada en el menú. */
+    alternativeEndpoints?: EndpointRequirement[];
 }
 
 export const APP_MODULES: AppModule[] = [
@@ -115,6 +118,15 @@ export const APP_MODULES: AppModule[] = [
         requiredEndpoints: MY_FAVORITE_TEAMS_VIEW_ENDPOINTS
     },
     {
+        label: 'Métodos de pago',
+        description: 'Administra el catálogo de medios de pago y gestiona tu billetera de aficionado.',
+        icon: 'pi-credit-card',
+        to: '/metodos-pago',
+        section: 'Gestión deportiva',
+        requiredEndpoints: PAYMENT_METHODS_VIEW_ENDPOINTS,
+        alternativeEndpoints: MY_PAYMENT_METHODS_VIEW_ENDPOINTS
+    },
+    {
         label: 'Mi perfil',
         description: 'Consulta y actualiza tus datos personales y tu foto.',
         icon: 'pi-user',
@@ -127,7 +139,13 @@ export const APP_MODULES: AppModule[] = [
 export type PermissionChecker = (url: string, method: string) => boolean;
 
 export function canAccessModule(module: AppModule, hasPermissionUrl: PermissionChecker): boolean {
-    return module.requiredEndpoints.every((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method));
+    if (module.requiredEndpoints.every((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method))) {
+        return true;
+    }
+    if (module.alternativeEndpoints && module.alternativeEndpoints.length > 0) {
+        return module.alternativeEndpoints.some((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method));
+    }
+    return false;
 }
 
 export function getAllowedModules(hasPermissionUrl: PermissionChecker): AppModule[] {

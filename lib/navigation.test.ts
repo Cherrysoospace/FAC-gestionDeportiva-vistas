@@ -62,4 +62,12 @@ describe('getAllowedModules', () => {
         expect(allowed.map((module) => module.to)).toEqual(['/mi-aficionado', '/equipos-favoritos', '/perfil']);
         expect(allowed.map((module) => module.to)).not.toContain('/aficionados');
     });
+
+    it('muestra Métodos de pago con permiso de catálogo o de billetera propia', () => {
+        const asAdmin = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/payment-methods');
+        const asFan = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/me/payment-methods');
+
+        expect(asAdmin.map((module) => module.to)).toEqual(['/metodos-pago', '/perfil']);
+        expect(asFan.map((module) => module.to)).toEqual(['/metodos-pago', '/perfil']);
+    });
 });
