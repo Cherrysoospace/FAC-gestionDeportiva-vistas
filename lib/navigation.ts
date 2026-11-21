@@ -5,6 +5,7 @@ import { FANS_VIEW_ENDPOINTS, MY_FAN_VIEW_ENDPOINTS, MY_FAVORITE_TEAMS_VIEW_ENDP
 import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
 import { MY_PAYMENT_METHODS_VIEW_ENDPOINTS, PAYMENT_METHODS_VIEW_ENDPOINTS } from './payment-method-constants';
 import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
+import { SPORTS_VIEW_ENDPOINTS } from './sport-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
 import { MY_TICKETS_VIEW_ENDPOINTS, TICKETS_VIEW_ENDPOINTS } from './ticket-constants';
 import { VENUES_VIEW_ENDPOINTS } from './venue-constants';
@@ -62,6 +63,14 @@ export const APP_MODULES: AppModule[] = [
         section: 'Gestión deportiva',
         // Permiso de ms-sports, registrado en ms_security con el prefijo /gestion-deportiva
         requiredEndpoints: [{ url: '/gestion-deportiva/tournaments', method: 'GET' }]
+    },
+    {
+        label: 'Deportes',
+        description: 'Administra el catálogo de deportes y sus subdeportes.',
+        icon: 'pi-star',
+        to: '/deportes',
+        section: 'Gestión deportiva',
+        requiredEndpoints: SPORTS_VIEW_ENDPOINTS
     },
     {
         label: 'Equipos',

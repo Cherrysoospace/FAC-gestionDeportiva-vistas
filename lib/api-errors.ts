@@ -8,6 +8,9 @@ export function describeError(cause: unknown): string {
         if (cause.status === 401) {
             return 'Tu sesión expiró. Inicia sesión nuevamente.';
         }
+        if (cause.status === 503) {
+            return 'El servicio no está disponible en este momento. Inténtalo de nuevo en unos minutos.';
+        }
         if (cause.status === 0) {
             return 'No se pudo conectar con el servidor.';
         }
