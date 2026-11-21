@@ -5,6 +5,7 @@ import {
     canModifyOrCancelMyBet,
     canVoidBetByAdmin,
     createEmptyBetForm,
+    shouldUseMyBetsSummary,
     toBetFormValues,
     toCancelBetPayload,
     toCreateBetPayload,
@@ -116,6 +117,17 @@ describe('bet-form', () => {
         expect(validateCancelBetReason('x'.repeat(256))).toContain('255');
         expect(toCancelBetPayload('   ')).toEqual({});
         expect(toCancelBetPayload('  Partido reprogramado  ')).toEqual({ reason: 'Partido reprogramado' });
+    });
+
+    it('selecciona el origen de las tarjetas de resumen según permisos y perfil de aficionado', () => {
+        // Admin sin perfil de aficionado -> usa adminBets
+        expect(shouldUseMyBetsSummary(true, true, true)).toBe(false);
+        // Admin con perfil de aficionado -> usa myBets
+        expect(shouldUseMyBetsSummary(true, true, false)).toBe(true);
+        // Solo admin -> usa adminBets
+        expect(shouldUseMyBetsSummary(false, true, false)).toBe(false);
+        // Solo aficionado sin perfil -> usa myBets (vacío)
+        expect(shouldUseMyBetsSummary(true, false, true)).toBe(true);
     });
 });
 

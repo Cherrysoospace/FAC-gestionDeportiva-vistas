@@ -19,6 +19,7 @@ export const MATCH_STATUS_OPTIONS = (Object.keys(MATCH_STATUS_LABELS) as MatchSt
 
 // Mismas reglas que MatchRulesPolicy en ms-sports
 export const canEditMatch = (status: MatchStatus) => status === 'SCHEDULED';
+export const canToggleMatchBetting = (status: MatchStatus) => status === 'SCHEDULED';
 export const canStartMatch = (status: MatchStatus) => status === 'SCHEDULED';
 export const canCancelMatch = (status: MatchStatus) => status === 'SCHEDULED' || status === 'IN_PROGRESS';
 export const canDeleteMatch = (status: MatchStatus) => status === 'SCHEDULED' || status === 'CANCELLED';

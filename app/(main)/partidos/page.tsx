@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -36,6 +36,7 @@ import {
     canEditMatch,
     canRecordResult,
     canStartMatch,
+    canToggleMatchBetting,
     canViewMatchGoals,
     formatScore,
     MATCH_STATUS_LABELS,
@@ -44,7 +45,7 @@ import {
 } from '@/lib/match-labels';
 import { TEAM_PLAYERS_LIST_ENDPOINT } from '@/lib/player-constants';
 import { TOURNAMENTS_VIEW_ENDPOINTS } from '@/lib/tournament-constants';
-import { formatDateTime } from '@/lib/tournament-labels';
+import { formatDateTime, isTournamentClosed } from '@/lib/tournament-labels';
 import { listTournaments } from '@/lib/tournaments-api';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
@@ -91,7 +92,14 @@ function MatchesContent() {
     const canLoadTeamPlayers = can(TEAM_PLAYERS_LIST_ENDPOINT);
     const canListTournaments = can(...TOURNAMENTS_VIEW_ENDPOINTS);
 
-    const { matches, loading, error, reload, create, update, changeStatus, recordResult, remove } = useMatches({ tournamentId, status });
+    const { matches, loading, error, reload, create, update, changeStatus, toggleBetting, recordResult, remove } = useMatches({ tournamentId, status });
+
+    const tournamentStatusById = useMemo(
+        () => new Map(tournaments.map((tournament) => [tournament.id, tournament.status])),
+        [tournaments]
+    );
+    const isMatchTournamentClosed = (match: Match) =>
+        isTournamentClosed(match.phase.tournament.status ?? tournamentStatusById.get(match.phase.tournament.id));
 
     // Filtro por torneo
     useEffect(() => {
@@ -140,6 +148,28 @@ function MatchesContent() {
             }
         });
 
+    const confirmBettingToggle = (match: Match) => {
+        const nextOpen = !match.bettingOpen;
+        confirmDialog({
+            header: nextOpen ? 'Reabrir apuestas' : 'Cerrar apuestas',
+            message: nextOpen
+                ? `¿Reabrir las apuestas para ${match.homeTeam.name} vs ${match.awayTeam.name}? Los aficionados podrán registrar, editar o cancelar apuestas nuevamente mientras el partido siga programado.`
+                : `¿Cerrar las apuestas para ${match.homeTeam.name} vs ${match.awayTeam.name}? No se permitirán nuevas apuestas ni cambios hasta que se reabran.`,
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: nextOpen ? 'Reabrir apuestas' : 'Cerrar apuestas',
+            rejectLabel: 'Volver',
+            acceptClassName: nextOpen ? undefined : 'p-button-warning',
+            accept: async () => {
+                const result = await toggleBetting(match.id, nextOpen);
+                notify(
+                    result,
+                    nextOpen ? 'Apuestas reabiertas para este partido.' : 'Apuestas cerradas para este partido.',
+                    'No se pudo actualizar el estado de apuestas'
+                );
+            }
+        });
+    };
+
     const handleDelete = (match: Match) =>
         confirmDialog({
             header: 'Eliminar partido',
@@ -175,10 +205,21 @@ function MatchesContent() {
         '12rem'
     );
     const venueBody = cell((match) => match.venue.name);
-    const statusBody = cell((match) => <Tag value={MATCH_STATUS_LABELS[match.status]} severity={MATCH_STATUS_SEVERITY[match.status]} />, '5rem');
+    const statusBody = cell(
+        (match) => (
+            <div className="flex flex-wrap gap-1 align-items-center">
+                <Tag value={MATCH_STATUS_LABELS[match.status]} severity={MATCH_STATUS_SEVERITY[match.status]} />
+                {match.status === 'SCHEDULED' && (
+                    <Tag value={match.bettingOpen ? 'Apuestas abiertas' : 'Apuestas cerradas'} severity={match.bettingOpen ? 'success' : 'warning'} />
+                )}
+            </div>
+        ),
+        '8rem'
+    );
 
     const actionsBody = (match: Match) => {
         if (loading) return <Skeleton width="10rem" height="2rem" />;
+        const tournamentClosed = isMatchTournamentClosed(match);
         return (
             <div className="flex gap-1">
                 {canViewBoard && <Button icon="pi pi-map" rounded text tooltip="Pizarra" tooltipOptions={{ position: 'top' }} aria-label="Ver pizarra" onClick={() => router.push(`/partidos/${match.id}/pizarra`)} />}
@@ -191,13 +232,39 @@ function MatchesContent() {
                         rounded
                         text
                         severity="help"
-                        tooltip={match.status === 'FINISHED' ? 'Corregir resultado' : 'Registrar resultado final'}
-                        tooltipOptions={{ position: 'top' }}
+                        tooltip={
+                            tournamentClosed
+                                ? 'El torneo está finalizado o cancelado: no se puede editar el resultado'
+                                : match.status === 'FINISHED'
+                                  ? 'Corregir resultado'
+                                  : 'Registrar resultado final'
+                        }
+                        tooltipOptions={{ position: 'top', showOnDisabled: true }}
                         aria-label="Registrar resultado final"
+                        disabled={tournamentClosed}
                         onClick={() => setResultMatch(match)}
                     />
                 )}
                 {canEdit && canEditMatch(match.status) && <Button icon="pi pi-pencil" rounded text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar partido" onClick={() => setDialog({ visible: true, match })} />}
+                {canUpdate && canToggleMatchBetting(match.status) && (
+                    <Button
+                        icon={match.bettingOpen ? 'pi pi-lock' : 'pi pi-lock-open'}
+                        rounded
+                        text
+                        severity={match.bettingOpen ? 'warning' : 'success'}
+                        tooltip={
+                            !match.bettingOpen && tournamentClosed
+                                ? 'El torneo está finalizado o cancelado: no se pueden reabrir apuestas'
+                                : match.bettingOpen
+                                  ? 'Cerrar apuestas'
+                                  : 'Reabrir apuestas'
+                        }
+                        tooltipOptions={{ position: 'top', showOnDisabled: true }}
+                        aria-label={match.bettingOpen ? 'Cerrar apuestas del partido' : 'Reabrir apuestas del partido'}
+                        disabled={!match.bettingOpen && tournamentClosed}
+                        onClick={() => confirmBettingToggle(match)}
+                    />
+                )}
                 {canUpdate && canStartMatch(match.status) && (
                     <Button icon="pi pi-play" rounded text severity="success" tooltip="Iniciar" tooltipOptions={{ position: 'top' }} aria-label="Iniciar partido" onClick={() => confirmStatus(match, 'IN_PROGRESS')} />
                 )}
@@ -278,6 +345,7 @@ function MatchesContent() {
             <MatchGoalsDialog
                 visible={goalsMatch !== null}
                 match={goalsMatch}
+                tournamentClosed={goalsMatch ? isMatchTournamentClosed(goalsMatch) : false}
                 canViewGoals={canViewGoals}
                 canCreateGoal={canCreateGoal}
                 canUpdateGoal={canUpdateGoal}

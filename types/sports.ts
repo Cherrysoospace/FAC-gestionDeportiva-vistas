@@ -720,7 +720,7 @@ export interface MatchPhase {
     type: 'GROUP' | 'FINAL';
     // 'Grupo A', 'Semifinal'...
     label: string;
-    tournament: { id: number; name: string };
+    tournament: { id: number; name: string; status?: TournamentStatus };
 }
 
 export interface MatchTeam {
@@ -762,6 +762,7 @@ export interface UpdateMatchPayload {
     ballId?: number;
     scheduledAt?: string;
     status?: MatchStatus;
+    bettingOpen?: boolean;
 }
 
 export interface MatchQuery {

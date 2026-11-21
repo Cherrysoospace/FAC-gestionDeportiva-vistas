@@ -33,6 +33,7 @@ import {
     BetFormValues,
     canModifyOrCancelMyBet,
     canVoidBetByAdmin,
+    shouldUseMyBetsSummary,
     toCancelBetPayload,
     toCreateBetPayload,
     toPlaceBetPayload,
@@ -164,8 +165,9 @@ function BetsContent() {
     const notify = (result: ActionResult, successText: string, errorSummary = 'No se pudo completar') =>
         toast.current?.show(result.ok ? { severity: 'success', summary: 'Listo', detail: successText, life: 3000 } : { severity: 'error', summary: errorSummary, detail: result.error, life: 6000 });
 
-    const summarySource = canViewMine ? myBets : adminBets;
-    const summaryLoading = canViewMine ? loadingMine : loadingAdmin;
+    const useMySummary = shouldUseMyBetsSummary(canViewMine, canViewAdmin, profileMissing);
+    const summarySource = useMySummary ? myBets : adminBets;
+    const summaryLoading = useMySummary ? loadingMine : loadingAdmin;
 
     const summary = useMemo(() => {
         const total = summarySource.length;

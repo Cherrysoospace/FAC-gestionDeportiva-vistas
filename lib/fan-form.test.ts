@@ -55,7 +55,8 @@ describe('fan-form', () => {
             fullName: '  Laura Gómez ',
             documentNumber: '1.053.800.123',
             email: ' LAURA@EJEMPLO.COM ',
-            phone: '  '
+            phone: '  ',
+            active: true
         });
 
         expect(createPayload).toEqual({

@@ -95,6 +95,10 @@ export function canVoidBetByAdmin(bet: Bet): boolean {
     return bet.status === 'PENDING';
 }
 
+export function shouldUseMyBetsSummary(canViewMine: boolean, canViewAdmin: boolean, profileMissing: boolean): boolean {
+    return canViewMine && !(canViewAdmin && profileMissing);
+}
+
 export function validateBetForm(values: BetFormValues, options: { editing: boolean; requireFan: boolean }): BetFormErrors {
     const errors: BetFormErrors = {};
 

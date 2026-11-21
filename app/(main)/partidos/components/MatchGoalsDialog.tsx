@@ -21,6 +21,7 @@ import {
     validateGoalForm
 } from '@/lib/goal-form';
 import { formatScore } from '@/lib/match-labels';
+import { isTournamentClosed } from '@/lib/tournament-labels';
 import { ActionResult } from '@/types/action';
 import { Goal, Match } from '@/types/sports';
 import { useMatchGoals } from '../hooks/useMatchGoals';
@@ -28,6 +29,7 @@ import { useMatchGoals } from '../hooks/useMatchGoals';
 interface MatchGoalsDialogProps {
     visible: boolean;
     match: Match | null;
+    tournamentClosed?: boolean;
     canViewGoals: boolean;
     canCreateGoal: boolean;
     canUpdateGoal: boolean;
@@ -40,6 +42,7 @@ interface MatchGoalsDialogProps {
 export default function MatchGoalsDialog({
     visible,
     match,
+    tournamentClosed,
     canViewGoals,
     canCreateGoal,
     canUpdateGoal,
@@ -54,7 +57,11 @@ export default function MatchGoalsDialog({
     const [saving, setSaving] = useState(false);
     const [serverError, setServerError] = useState<string | null>(null);
 
-    const canEditAny = canCreateGoal || canUpdateGoal;
+    const isClosedTournament = tournamentClosed ?? isTournamentClosed(match?.phase.tournament.status);
+    const effectiveCanCreate = canCreateGoal && !isClosedTournament;
+    const effectiveCanUpdate = canUpdateGoal && !isClosedTournament;
+    const effectiveCanDelete = canDeleteGoal && !isClosedTournament;
+    const canEditAny = effectiveCanCreate || effectiveCanUpdate;
     const { goals, playerOptions, playerTeamMap, loading, loadingPlayers, error, create, update, remove } = useMatchGoals(
         match,
         visible,
@@ -85,7 +92,7 @@ export default function MatchGoalsDialog({
 
     if (!match) return null;
 
-    const showForm = editingGoal ? canUpdateGoal : canCreateGoal;
+    const showForm = editingGoal ? effectiveCanUpdate : effectiveCanCreate;
     const errors = validateGoalForm(values);
     const fieldError = (field: keyof GoalFormValues) => (submitted ? errors[field] : undefined);
     const invalidClass = (field: keyof GoalFormValues) => (fieldError(field) ? 'p-invalid' : undefined);
@@ -143,7 +150,7 @@ export default function MatchGoalsDialog({
 
     const actionsBody = (goal: Goal) => (
         <div className="flex gap-1">
-            {canUpdateGoal && (
+            {effectiveCanUpdate && (
                 <Button
                     icon="pi pi-pencil"
                     rounded
@@ -154,7 +161,7 @@ export default function MatchGoalsDialog({
                     onClick={() => handleEditClick(goal)}
                 />
             )}
-            {canDeleteGoal && (
+            {effectiveCanDelete && (
                 <Button
                     icon="pi pi-trash"
                     rounded
@@ -189,6 +196,14 @@ export default function MatchGoalsDialog({
             </div>
 
             {error && <Message severity="error" text={error} className="w-full mb-3" />}
+
+            {isClosedTournament && (
+                <Message
+                    severity="info"
+                    text="El torneo está finalizado o cancelado: no se pueden registrar, editar ni eliminar anotaciones."
+                    className="w-full mb-3"
+                />
+            )}
 
             {showForm && (
                 <form onSubmit={handleSubmit} className="surface-50 border-1 surface-border border-round p-3 mb-3 p-fluid" noValidate>
@@ -305,7 +320,7 @@ export default function MatchGoalsDialog({
                     header="Descripción"
                     body={(goal: Goal) => goal.description ?? <span className="text-500">Sin descripción</span>}
                 />
-                {(canUpdateGoal || canDeleteGoal) && <Column header="Acciones" body={actionsBody} headerClassName="w-7rem" />}
+                {(effectiveCanUpdate || effectiveCanDelete) && <Column header="Acciones" body={actionsBody} headerClassName="w-7rem" />}
             </DataTable>
         </Dialog>
     );

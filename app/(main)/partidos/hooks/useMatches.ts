@@ -55,6 +55,8 @@ export function useMatches({ tournamentId, status }: MatchFilters) {
 
     const changeStatus = useCallback((id: number, next: MatchStatus) => update(id, { status: next }), [update]);
 
+    const toggleBetting = useCallback((id: number, bettingOpen: boolean) => update(id, { bettingOpen }), [update]);
+
     const recordResult = useCallback(
         (id: number, payload: RecordMatchResultPayload) => runFormAction(async () => replaceLocal(await recordMatchResult(id, payload))),
         [replaceLocal]
@@ -69,5 +71,5 @@ export function useMatches({ tournamentId, status }: MatchFilters) {
         []
     );
 
-    return { matches, loading, error, reload, create, update, changeStatus, recordResult, remove };
+    return { matches, loading, error, reload, create, update, changeStatus, toggleBetting, recordResult, remove };
 }

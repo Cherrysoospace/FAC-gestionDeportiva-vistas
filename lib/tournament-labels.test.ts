@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allowedTransitions, formatDay, isTournamentLocked, requiresConfirmation } from './tournament-labels';
+import { allowedTransitions, formatDay, isTournamentClosed, isTournamentLocked, requiresConfirmation } from './tournament-labels';
 
 describe('allowedTransitions', () => {
     it('desde PLANNED solo abre inscripciones o cancela', () => {
@@ -33,6 +33,15 @@ describe('reglas de estado', () => {
         expect(isTournamentLocked('IN_PROGRESS')).toBe(true);
         expect(isTournamentLocked('FINISHED')).toBe(true);
         expect(isTournamentLocked('CANCELLED')).toBe(true);
+    });
+
+    it('marca como cerrado únicamente FINISHED y CANCELLED', () => {
+        expect(isTournamentClosed('PLANNED')).toBe(false);
+        expect(isTournamentClosed('REGISTRATION_OPEN')).toBe(false);
+        expect(isTournamentClosed('IN_PROGRESS')).toBe(false);
+        expect(isTournamentClosed('FINISHED')).toBe(true);
+        expect(isTournamentClosed('CANCELLED')).toBe(true);
+        expect(isTournamentClosed(undefined)).toBe(false);
     });
 });
 

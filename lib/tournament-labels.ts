@@ -50,6 +50,10 @@ export function isTournamentLocked(status: TournamentStatus): boolean {
     return status === 'IN_PROGRESS' || status === 'FINISHED' || status === 'CANCELLED';
 }
 
+export function isTournamentClosed(status?: TournamentStatus): boolean {
+    return status === 'FINISHED' || status === 'CANCELLED';
+}
+
 // 'YYYY-MM-DD' → 'dd/mm/aaaa', sin pasar por Date (no se corre por la zona horaria).
 export function formatDay(value: string | null): string {
     if (!value) return 'Sin fecha';
