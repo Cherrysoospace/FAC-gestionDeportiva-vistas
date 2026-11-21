@@ -30,3 +30,4 @@ export function assignGroupTeam(groupPhaseId: number, payload: AssignGroupTeamPa
 export function removeGroupTeam(groupPhaseId: number, teamId: number): Promise<MessageResponse> {
     return sportsApiFetch<MessageResponse>(`/group-phases/${groupPhaseId}/teams/${teamId}`, { method: 'DELETE' });
 }
+

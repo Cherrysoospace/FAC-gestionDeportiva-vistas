@@ -26,3 +26,4 @@ describe('skill-form', () => {
         expect(toUpdateSkillPayload({ ...values, category: 'TACTICAL' }, skill)).toEqual({ category: 'TACTICAL' });
     });
 });
+

@@ -29,3 +29,4 @@ export const SKILL_CATEGORY_SEVERITY: Record<SkillCategory, 'success' | 'info' |
 };
 
 export const SKILL_CATEGORY_OPTIONS = (Object.keys(SKILL_CATEGORY_LABELS) as SkillCategory[]).map((category) => ({ label: SKILL_CATEGORY_LABELS[category], value: category }));
+

@@ -23,3 +23,4 @@ describe('ball-form', () => {
         expect(toUpdateBallPayload({ ...values, size: '', active: false }, ball)).toEqual({ size: null, active: false });
     });
 });
+

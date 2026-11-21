@@ -48,3 +48,4 @@ describe('phase-form', () => {
         expect(toUpdateFinalPhasePayload({ ...finalValues, round: 'SEMI_FINAL' }, final)).toEqual({ round: 'SEMI_FINAL' });
     });
 });
+

@@ -119,3 +119,4 @@ export default function GroupPhasesPanel({ tournament, canCreate, canUpdate, can
         </div>
     );
 }
+

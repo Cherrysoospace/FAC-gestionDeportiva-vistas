@@ -9,3 +9,4 @@ export const FINAL_ROUND_LABELS: Record<FinalRound, string> = {
 };
 
 export const FINAL_ROUND_OPTIONS = (Object.keys(FINAL_ROUND_LABELS) as FinalRound[]).map((round) => ({ label: FINAL_ROUND_LABELS[round], value: round }));
+

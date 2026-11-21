@@ -125,3 +125,4 @@ export default function GroupTeamsDialog({ visible, group, locked, canAssign, ca
         </Dialog>
     );
 }
+

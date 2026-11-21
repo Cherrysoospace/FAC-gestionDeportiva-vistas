@@ -85,3 +85,4 @@ export default function SkillFormDialog({ visible, skill, onHide, onSubmit }: Sk
         </Dialog>
     );
 }
+

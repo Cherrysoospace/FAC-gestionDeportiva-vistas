@@ -103,3 +103,4 @@ export default function FinalPhasesPanel({ tournament, canCreate, canUpdate, can
         </div>
     );
 }
+

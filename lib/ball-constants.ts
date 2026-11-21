@@ -12,3 +12,4 @@ export const BALL_CREATE_ENDPOINT: EndpointRequirement = { url: BALLS, method: '
 export const BALL_UPDATE_ENDPOINT: EndpointRequirement = { url: `${BALLS}/{id}`, method: 'PATCH' };
 
 export const BALL_DELETE_ENDPOINT: EndpointRequirement = { url: `${BALLS}/{id}`, method: 'DELETE' };
+

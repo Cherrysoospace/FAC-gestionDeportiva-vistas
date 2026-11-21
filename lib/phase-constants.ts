@@ -29,3 +29,4 @@ export const FINAL_PHASE_CREATE_ENDPOINT: EndpointRequirement = { url: FINAL_PHA
 export const FINAL_PHASE_UPDATE_ENDPOINT: EndpointRequirement = { url: `${FINAL_PHASES}/{id}`, method: 'PATCH' };
 
 export const FINAL_PHASE_DELETE_ENDPOINT: EndpointRequirement = { url: `${FINAL_PHASES}/{id}`, method: 'DELETE' };
+
