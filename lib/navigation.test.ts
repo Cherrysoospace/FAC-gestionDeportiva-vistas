@@ -44,4 +44,22 @@ describe('getAllowedModules', () => {
 
         expect(allowed.map((module) => module.to)).toEqual(['/partidos', '/perfil']);
     });
+
+    it('muestra Aficionados solo al rol con GET /gestion-deportiva/fans', () => {
+        const allowed = getAllowedModules((url, method) => method === 'GET' && url === '/gestion-deportiva/fans');
+
+        expect(allowed.map((module) => module.to)).toEqual(['/aficionados', '/perfil']);
+        expect(allowed.map((module) => module.to)).not.toContain('/mi-aficionado');
+        expect(allowed.map((module) => module.to)).not.toContain('/equipos-favoritos');
+    });
+
+    it('muestra Mi perfil de aficionado y Equipos favoritos al Aficionado sin mostrar Aficionados', () => {
+        const allowed = getAllowedModules(
+            (url, method) =>
+                method === 'GET' && ['/gestion-deportiva/me/fan', '/gestion-deportiva/me/favorite-teams'].includes(url)
+        );
+
+        expect(allowed.map((module) => module.to)).toEqual(['/mi-aficionado', '/equipos-favoritos', '/perfil']);
+        expect(allowed.map((module) => module.to)).not.toContain('/aficionados');
+    });
 });

@@ -1,5 +1,6 @@
 import { EndpointRequirement } from '@/types/security';
 import { PERMISSIONS_VIEW_ENDPOINTS, ROLE_PERMISSIONS_VIEW_ENDPOINTS, ROLES_VIEW_ENDPOINTS, USERS_VIEW_ENDPOINTS } from './security-constants';
+import { FANS_VIEW_ENDPOINTS, MY_FAN_VIEW_ENDPOINTS, MY_FAVORITE_TEAMS_VIEW_ENDPOINTS } from './fan-constants';
 import { MATCHES_VIEW_ENDPOINTS } from './match-constants';
 import { PLAYERS_VIEW_ENDPOINTS } from './player-constants';
 import { TEAMS_VIEW_ENDPOINTS } from './team-constants';
@@ -88,6 +89,30 @@ export const APP_MODULES: AppModule[] = [
         to: '/partidos',
         section: 'Gestión deportiva',
         requiredEndpoints: MATCHES_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Aficionados',
+        description: 'Administra los aficionados registrados y sus perfiles vinculados.',
+        icon: 'pi-users',
+        to: '/aficionados',
+        section: 'Gestión deportiva',
+        requiredEndpoints: FANS_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Mi perfil de aficionado',
+        description: 'Registra o actualiza tu ficha de aficionado para comprar boletos y apostar.',
+        icon: 'pi-id-card',
+        to: '/mi-aficionado',
+        section: 'Gestión deportiva',
+        requiredEndpoints: MY_FAN_VIEW_ENDPOINTS
+    },
+    {
+        label: 'Equipos favoritos',
+        description: 'Elige tus equipos favoritos para recibir notificaciones de sus partidos.',
+        icon: 'pi-heart',
+        to: '/equipos-favoritos',
+        section: 'Gestión deportiva',
+        requiredEndpoints: MY_FAVORITE_TEAMS_VIEW_ENDPOINTS
     },
     {
         label: 'Mi perfil',

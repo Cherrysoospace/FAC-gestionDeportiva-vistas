@@ -39,6 +39,7 @@ const AppMenu = () => {
         },
         {
             label: 'Mi cuenta',
+            visible: accountItems.some((item) => item.visible),
             items: accountItems
         }
     ];
