@@ -23,7 +23,7 @@ import {
 } from '@/lib/tournament-constants';
 import { TEAM_DETAIL_ENDPOINTS, TEAMS_VIEW_ENDPOINTS } from '@/lib/team-constants';
 import { toUpdatePayload, TournamentActionResult, TournamentFormValues } from '@/lib/tournament-form';
-import { allowedTransitions, formatDateTime, formatDay, TOURNAMENT_STATUS_LABELS } from '@/lib/tournament-labels';
+import { allowedTransitions, formatDateTime, formatDay, registrationBlockedMessage, TOURNAMENT_STATUS_LABELS, tournamentStatusDisplay } from '@/lib/tournament-labels';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Registration, Tournament, TournamentStatus, TournamentVenue } from '@/types/sports';
@@ -188,7 +188,7 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
             {tournament && (
                 <div className="card">
                     <div className="flex flex-wrap align-items-center gap-2 mb-3">
-                        <TournamentStatusTag status={tournament.status} />
+                        <TournamentStatusTag tournament={tournament} />
                         <TournamentActiveTag active={tournament.active} />
                     </div>
                     <TabView>
@@ -233,7 +233,7 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
                                     sportName={tournament.sport.name}
                                     loading={tournamentRegistrations.loading}
                                     error={tournamentRegistrations.error}
-                                    canOpenRegistration={tournament.status === 'REGISTRATION_OPEN'}
+                                    registrationBlockedMessage={registrationBlockedMessage(tournament)}
                                     canCreate={canCreateRegistration}
                                     canWithdraw={canWithdrawRegistration}
                                     canViewTeam={canViewTeam}
@@ -279,7 +279,7 @@ function TournamentInfo({ tournament }: { tournament: Tournament }) {
         ['Fecha de fin', formatDay(tournament.endDate)],
         ['Apertura de inscripciones', formatDateTime(tournament.registrationOpensAt)],
         ['Cierre de inscripciones', formatDateTime(tournament.registrationClosesAt)],
-        ['Estado', TOURNAMENT_STATUS_LABELS[tournament.status]],
+        ['Estado', tournamentStatusDisplay(tournament).label],
         ['Equipos inscritos', tournament.registrationsCount],
         ['Fases', tournament.phasesCount]
     ];

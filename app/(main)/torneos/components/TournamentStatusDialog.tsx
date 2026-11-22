@@ -65,7 +65,7 @@ export default function TournamentStatusDialog({ visible, tournament, onHide, on
                 <div className="flex flex-column gap-3">
                     <div className="flex align-items-center gap-2">
                         <span className="text-600">Estado actual:</span>
-                        <TournamentStatusTag status={tournament.status} />
+                        <TournamentStatusTag tournament={tournament} />
                     </div>
 
                     {options.length === 0 ? (

@@ -144,7 +144,7 @@ function TournamentsContent() {
         ),
         '10rem'
     );
-    const statusBody = cell((tournament) => <TournamentStatusTag status={tournament.status} />);
+    const statusBody = cell((tournament) => <TournamentStatusTag tournament={tournament} />);
     const registrationsBody = cell((tournament) => tournament.registrationsCount, '2rem');
     const phasesBody = cell((tournament) => tournament.phasesCount, '2rem');
     const activeBody = cell((tournament) => <TournamentActiveTag active={tournament.active} />, '4rem');

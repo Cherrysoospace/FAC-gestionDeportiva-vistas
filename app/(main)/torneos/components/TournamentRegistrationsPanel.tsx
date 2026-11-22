@@ -21,8 +21,8 @@ interface TournamentRegistrationsPanelProps {
     sportName: string;
     loading: boolean;
     error: string | null;
-    /** Solo se inscriben o retiran equipos cuando el torneo tiene inscripciones abiertas */
-    canOpenRegistration: boolean;
+    /** Por qué no se puede inscribir ni retirar equipos (estado o fechas); null = periodo abierto */
+    registrationBlockedMessage: string | null;
     canCreate: boolean;
     canWithdraw: boolean;
     canViewTeam: boolean;
@@ -46,13 +46,14 @@ export default function TournamentRegistrationsPanel({
     sportName,
     loading,
     error,
-    canOpenRegistration,
+    registrationBlockedMessage,
     canCreate,
     canWithdraw,
     canViewTeam,
     onEnroll,
     onWithdraw
 }: TournamentRegistrationsPanelProps) {
+    const canOpenRegistration = registrationBlockedMessage === null;
     const [selectedTeamIds, setSelectedTeamIds] = useState<number[]>([]);
     const [busy, setBusy] = useState(false);
 
@@ -125,13 +126,7 @@ export default function TournamentRegistrationsPanel({
 
     return (
         <div>
-            {!canOpenRegistration && (
-                <Message
-                    severity="info"
-                    text="Las inscripciones solo se pueden registrar o retirar cuando el torneo está con inscripciones abiertas."
-                    className="w-full mb-3"
-                />
-            )}
+            {registrationBlockedMessage && <Message severity="info" text={registrationBlockedMessage} className="w-full mb-3" />}
 
             {canCreate && canOpenRegistration && (
                 <div className="flex flex-column md:flex-row gap-2 mb-3">

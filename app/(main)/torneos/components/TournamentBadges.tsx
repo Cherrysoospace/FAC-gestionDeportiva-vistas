@@ -1,9 +1,10 @@
 import { Tag } from 'primereact/tag';
-import { TOURNAMENT_STATUS_LABELS, TOURNAMENT_STATUS_SEVERITY } from '@/lib/tournament-labels';
-import { TournamentStatus } from '@/types/sports';
+import { RegistrationWindow, tournamentStatusDisplay } from '@/lib/tournament-labels';
 
-export function TournamentStatusTag({ status }: { status: TournamentStatus }) {
-    return <Tag value={TOURNAMENT_STATUS_LABELS[status]} severity={TOURNAMENT_STATUS_SEVERITY[status]} />;
+// Con estado REGISTRATION_OPEN también mira las fechas: si el periodo ya venció dice "Inscripciones cerradas".
+export function TournamentStatusTag({ tournament }: { tournament: RegistrationWindow }) {
+    const { label, severity } = tournamentStatusDisplay(tournament);
+    return <Tag value={label} severity={severity} />;
 }
 
 export function TournamentActiveTag({ active }: { active: boolean }) {
