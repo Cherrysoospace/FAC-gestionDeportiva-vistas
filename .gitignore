@@ -37,3 +37,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Archivos de agentes locales (cada integrante tiene los suyos)
+AGENTS.md
+CLAUDE.md
+.claude/
+docs/
+
+/.claude

@@ -1195,3 +1195,150 @@ export interface AvailableBetMatchesQuery {
     teamId?: number;
     venueId?: number;
 }
+
+// ---- Desarrollo del torneo, HU-GC-08b (tournament-development/dto/tournament-development-response.dto.ts) ----
+
+export interface DevelopmentRef {
+    id: number;
+    name: string;
+}
+
+export interface DevelopmentTournament {
+    id: number;
+    name: string;
+    sport: DevelopmentRef;
+    status: TournamentStatus;
+    // Fecha de día 'YYYY-MM-DD'
+    startDate: string;
+    // Fecha de día 'YYYY-MM-DD'
+    endDate: string;
+    // Fecha y hora ISO 8601
+    registrationOpensAt: string;
+    // Fecha y hora ISO 8601
+    registrationClosesAt: string;
+    active: boolean;
+}
+
+export interface DevelopmentSummary {
+    // Inscripciones ACTIVE del torneo
+    teams: number;
+    matches: number;
+    // Con resultado registrado
+    finishedMatches: number;
+    // Sin resultado y no cancelados
+    pendingMatches: number;
+    cancelledMatches: number;
+    // Total de anotaciones registradas en el torneo
+    goals: number;
+    // finishedMatches / (matches - cancelledMatches), de 0 a 100
+    completionPercentage: number;
+    // Menor orden con partidos pendientes; la última si todas terminaron; null sin fases
+    currentPhase: DevelopmentCurrentPhase | null;
+    // Perdedores de la fase final + los que no clasificaron en grupos terminados
+    eliminatedTeams: DevelopmentRef[];
+}
+
+export type DevelopmentCurrentPhase = { id: number; name: string; type: 'GROUP'; groupName: string } | { id: number; name: string; type: 'FINAL'; round: FinalRound };
+
+export interface DevelopmentPlayer {
+    id: number;
+    fullName: string;
+}
+
+export interface DevelopmentGoal {
+    id: number;
+    minute: number;
+    points: number;
+    description: string | null;
+    player: DevelopmentPlayer;
+    // Deducido de los contratos del jugador; null si no se puede determinar
+    team: DevelopmentRef | null;
+}
+
+export interface DevelopmentMatch {
+    id: number;
+    // Fecha y hora ISO 8601
+    scheduledAt: string;
+    status: MatchStatus;
+    homeTeam: DevelopmentRef;
+    awayTeam: DevelopmentRef;
+    homeScore: number | null;
+    awayScore: number | null;
+    // true = resultado registrado; false = pendiente o cancelado
+    hasResult: boolean;
+    venue: DevelopmentRef;
+    goals: DevelopmentGoal[];
+}
+
+export interface DevelopmentStanding {
+    position: number;
+    team: DevelopmentRef;
+    played: number;
+    won: number;
+    drawn: number;
+    lost: number;
+    goalsFor: number;
+    goalsAgainst: number;
+    goalDifference: number;
+    points: number;
+}
+
+export interface DevelopmentGroup {
+    id: number;
+    groupName: string;
+    // 'Grupo A'
+    label: string;
+    qualifiersCount: number | null;
+    teams: DevelopmentRef[];
+    standings: DevelopmentStanding[];
+    matches: DevelopmentMatch[];
+}
+
+// Llave: partidos entre los mismos dos equipos dentro de una ronda (único o ida y vuelta)
+export interface DevelopmentTie {
+    teamA: DevelopmentRef;
+    teamB: DevelopmentRef;
+    // Suma de los marcadores con resultado; null si ninguno tiene resultado
+    teamAScore: number | null;
+    teamBScore: number | null;
+    // null si hay partidos pendientes, ninguno con resultado o empate global
+    winner: DevelopmentRef | null;
+    matches: DevelopmentMatch[];
+}
+
+// Fase de grupos: todos los grupos que comparten orden en el torneo
+export interface DevelopmentGroupStage {
+    type: 'GROUP';
+    order: number;
+    name: string;
+    // Fecha de día 'YYYY-MM-DD'
+    startDate: string | null;
+    // Fecha de día 'YYYY-MM-DD'
+    endDate: string | null;
+    groups: DevelopmentGroup[];
+}
+
+// Una ronda de la fase final con sus llaves
+export interface DevelopmentFinalRound {
+    type: 'FINAL';
+    id: number;
+    order: number;
+    name: string;
+    round: FinalRound;
+    // 'Semifinal'
+    label: string;
+    // Fecha de día 'YYYY-MM-DD'
+    startDate: string | null;
+    // Fecha de día 'YYYY-MM-DD'
+    endDate: string | null;
+    ties: DevelopmentTie[];
+}
+
+export type DevelopmentPhase = DevelopmentGroupStage | DevelopmentFinalRound;
+
+export interface TournamentDevelopment {
+    tournament: DevelopmentTournament;
+    summary: DevelopmentSummary;
+    // En el orden de la competencia (phase_order)
+    phases: DevelopmentPhase[];
+}

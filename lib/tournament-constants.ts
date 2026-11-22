@@ -25,3 +25,6 @@ export const REGISTRATIONS_LIST_ENDPOINT: EndpointRequirement = { url: REGISTRAT
 export const REGISTRATION_CREATE_ENDPOINT: EndpointRequirement = { url: REGISTRATIONS, method: 'POST' };
 
 export const REGISTRATION_WITHDRAW_ENDPOINT: EndpointRequirement = { url: `${REGISTRATIONS}/{id}/withdraw`, method: 'PATCH' };
+
+// Desarrollo del torneo (HU-GC-08b): GET /tournaments/:id/development
+export const TOURNAMENT_DEVELOPMENT_ENDPOINT: EndpointRequirement = { url: `${TOURNAMENTS}/{id}/development`, method: 'GET' };

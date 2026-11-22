@@ -18,6 +18,7 @@ import {
     REGISTRATIONS_LIST_ENDPOINT,
     SPORTS_LIST_ENDPOINT,
     TOURNAMENT_DETAIL_ENDPOINTS,
+    TOURNAMENT_DEVELOPMENT_ENDPOINT,
     TOURNAMENT_UPDATE_ENDPOINT
 } from '@/lib/tournament-constants';
 import { TEAM_DETAIL_ENDPOINTS, TEAMS_VIEW_ENDPOINTS } from '@/lib/team-constants';
@@ -43,6 +44,7 @@ import {
 import FinalPhasesPanel from '../components/FinalPhasesPanel';
 import GroupPhasesPanel from '../components/GroupPhasesPanel';
 import { TournamentActiveTag, TournamentStatusTag } from '../components/TournamentBadges';
+import TournamentDevelopmentPanel from '../components/TournamentDevelopmentPanel';
 import TournamentFormDialog from '../components/TournamentFormDialog';
 import TournamentRegistrationsPanel from '../components/TournamentRegistrationsPanel';
 import TournamentStatusDialog from '../components/TournamentStatusDialog';
@@ -104,6 +106,9 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
     const canCreateFinalPhase = can(FINAL_PHASE_CREATE_ENDPOINT);
     const canUpdateFinalPhase = can(FINAL_PHASE_UPDATE_ENDPOINT);
     const canDeleteFinalPhase = can(FINAL_PHASE_DELETE_ENDPOINT);
+
+    // Pestaña Desarrollo (HU-GC-08b): solo con permiso de GET /tournaments/{id}/development
+    const canViewDevelopment = can(TOURNAMENT_DEVELOPMENT_ENDPOINT);
 
     const handleEnableVenue = async (venueId: number) => {
         const result = await tournamentVenues.enable(venueId);
@@ -215,6 +220,11 @@ function TournamentDetailContent({ tournamentId }: { tournamentId: number }) {
                                 <EmptyState icon="pi-lock" title="No tienes permiso para consultar las fases finales del torneo." />
                             )}
                         </TabPanel>
+                        {canViewDevelopment && (
+                            <TabPanel header="Desarrollo">
+                                <TournamentDevelopmentPanel tournamentId={tournament.id} />
+                            </TabPanel>
+                        )}
                         <TabPanel header="Inscripciones">
                             {canListRegistrations ? (
                                 <TournamentRegistrationsPanel
