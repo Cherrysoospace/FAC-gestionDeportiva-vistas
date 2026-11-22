@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Avatar } from 'primereact/avatar';
 import { Button } from 'primereact/button';
@@ -54,6 +54,13 @@ function UsersContent() {
     const { hasPermissionUrl, user: currentUser } = useAuth();
     const { users, loading, error, reload, create, update, setEnabled } = useUsers();
     const [query, setQuery] = useState('');
+
+    // Búsqueda local por nombre o correo (igual que las demás tablas del proyecto)
+    const filteredUsers = useMemo(() => {
+        const text = query.trim().toLowerCase();
+        if (!text) return users;
+        return users.filter((user) => user.name.toLowerCase().includes(text) || user.email.toLowerCase().includes(text));
+    }, [users, query]);
     const [dialog, setDialog] = useState<{ visible: boolean; user: UserAccount | null }>({ visible: false, user: null });
 
     const can = (...endpoints: EndpointRequirement[]) => endpoints.every((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method));
@@ -137,11 +144,9 @@ function UsersContent() {
                 </div>
 
                 <DataTable
-                    value={loading ? SKELETON_ROWS : users}
+                    value={loading ? SKELETON_ROWS : filteredUsers}
                     dataKey="id"
-                    globalFilter={query}
-                    globalFilterFields={['name', 'email']}
-                    paginator={!loading && users.length > 10}
+                    paginator={!loading && filteredUsers.length > 10}
                     rows={10}
                     emptyMessage={<EmptyState icon="pi-users" title={query ? 'Ningún usuario coincide con la búsqueda.' : 'No hay usuarios registrados.'} />}
                 >
