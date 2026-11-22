@@ -29,7 +29,7 @@ import {
 } from '@/lib/team-constants';
 import { TeamFormValues, toUpdateTeamPayload } from '@/lib/team-form';
 import { TEAM_MODALITY_LABELS } from '@/lib/team-labels';
-import { SPORTS_LIST_ENDPOINT } from '@/lib/tournament-constants';
+import { REGISTRATIONS_LIST_ENDPOINT, SPORTS_LIST_ENDPOINT, TOURNAMENT_DETAIL_ENDPOINTS } from '@/lib/tournament-constants';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { RelatedTeam, Sport, Team, TeamPlayer, TeamSportAssociation } from '@/types/sports';
@@ -42,8 +42,10 @@ import ReleaseContractDialog from '../components/ReleaseContractDialog';
 import TeamFormDialog from '../components/TeamFormDialog';
 import TeamRosterPanel from '../components/TeamRosterPanel';
 import TeamSportsPanel from '../components/TeamSportsPanel';
+import TeamTournamentsPanel from '../components/TeamTournamentsPanel';
 import { useRelatedTeams } from '../hooks/useRelatedTeams';
 import { useTeamDetail } from '../hooks/useTeamDetail';
+import { useTeamRegistrations } from '../hooks/useTeamRegistrations';
 import { useTeamRoster } from '../hooks/useTeamRoster';
 import { useTeamSports } from '../hooks/useTeamSports';
 
@@ -81,11 +83,14 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
     const canEditContract = can(TEAM_PLAYER_UPDATE_ENDPOINT);
     const canReleasePlayer = can(TEAM_PLAYER_RELEASE_ENDPOINT);
     const canViewPlayer = can(...PLAYER_PROFILE_ENDPOINTS);
+    const canListRegistrations = can(REGISTRATIONS_LIST_ENDPOINT);
+    const canViewTournament = can(...TOURNAMENT_DETAIL_ENDPOINTS);
 
     const { team, loading, loadError, update, reload } = useTeamDetail(teamId);
     const teamSports = useTeamSports(teamId, canListTeamSports);
     const related = useRelatedTeams(teamId, canListRelated);
     const roster = useTeamRoster(teamId, canListRoster, reload);
+    const tournaments = useTeamRegistrations(teamId, canListRegistrations);
     const { sports } = useSportOptions(canAssociate);
     const { teams: candidates } = useTeamOptions(canRelate);
     const { players } = usePlayerOptions(canAssignPlayer);
@@ -225,6 +230,11 @@ function TeamDetailContent({ teamId }: { teamId: number }) {
                                         onEdit={(contract) => setContractDialog({ kind: 'form', contract })}
                                         onRelease={(contract) => setContractDialog({ kind: 'release', contract })}
                                     />
+                                </TabPanel>
+                            )}
+                            {canListRegistrations && (
+                                <TabPanel header="Torneos">
+                                    <TeamTournamentsPanel registrations={tournaments.registrations} loading={tournaments.loading} error={tournaments.error} canViewTournament={canViewTournament} />
                                 </TabPanel>
                             )}
                         </TabView>

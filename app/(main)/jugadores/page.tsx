@@ -18,13 +18,14 @@ import SearchInput from '@/components/ui/SearchInput';
 import { useAuth } from '@/layout/context/authcontext';
 import ProtectedRoute from '@/layout/ProtectedRoute';
 import { FormActionResult } from '@/lib/form-action';
-import { PLAYER_CREATE_ENDPOINT, PLAYER_DELETE_ENDPOINT, PLAYER_PROFILE_ENDPOINTS, PLAYER_UPDATE_ENDPOINT, PLAYERS_VIEW_ENDPOINTS } from '@/lib/player-constants';
+import { PLAYER_CREATE_ENDPOINT, PLAYER_DELETE_ENDPOINT, PLAYER_PROFILE_ENDPOINTS, PLAYER_UPDATE_ENDPOINT, PLAYERS_VIEW_ENDPOINTS, SKILLS_LIST_ENDPOINT } from '@/lib/player-constants';
 import { PlayerFormValues, toCreatePlayerPayload, toUpdatePlayerPayload } from '@/lib/player-form';
 import { TEAMS_VIEW_ENDPOINTS } from '@/lib/team-constants';
 import { SPORTS_LIST_ENDPOINT } from '@/lib/tournament-constants';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Player } from '@/types/sports';
+import { useSkillOptions } from '../hooks/useSkillOptions';
 import { useSportOptions } from '../hooks/useSportOptions';
 import { useTeamOptions } from '../hooks/useTeamOptions';
 import PlayerFormDialog from './components/PlayerFormDialog';
@@ -71,6 +72,7 @@ function PlayersContent() {
     const [search, setSearch] = useState('');
     const [teamId, setTeamId] = useState<number | null>(null);
     const [sportId, setSportId] = useState<number | null>(null);
+    const [skillId, setSkillId] = useState<number | null>(null);
     const [active, setActive] = useState<boolean | null>(null);
     const [dialog, setDialog] = useState<DialogState>({ visible: false, player: null });
 
@@ -86,11 +88,13 @@ function PlayersContent() {
     const canViewProfile = can(...PLAYER_PROFILE_ENDPOINTS);
     const canListTeams = can(...TEAMS_VIEW_ENDPOINTS);
     const canListSports = can(SPORTS_LIST_ENDPOINT);
+    const canListSkills = can(SKILLS_LIST_ENDPOINT);
     const hasActions = canUpdate || canDelete || canViewProfile;
 
-    const { players, loading, error, reload, create, update, remove } = usePlayers({ search, teamId, sportId, active });
+    const { players, loading, error, reload, create, update, remove } = usePlayers({ search, teamId, sportId, skillId, active });
     const { teams } = useTeamOptions(canListTeams);
     const { sports } = useSportOptions(canListSports);
+    const { skills } = useSkillOptions(canListSkills);
 
     const closeDialog = () => setDialog({ visible: false, player: null });
 
@@ -108,7 +112,7 @@ function PlayersContent() {
     const handleDelete = (player: Player) =>
         confirmDialog({
             header: 'Eliminar jugador',
-            message: `¿Eliminar a "${player.fullName}"? Solo se puede si no tiene contratos con equipos ni habilidades.`,
+            message: `¿Eliminar a "${player.fullName}"? Solo se puede si no tiene contratos con equipos, habilidades, anotaciones ni posiciones registradas en partidos.`,
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Eliminar',
             rejectLabel: 'Cancelar',
@@ -142,7 +146,7 @@ function PlayersContent() {
         );
     };
 
-    const hasFilters = Boolean(search.trim()) || teamId !== null || sportId !== null || active !== null;
+    const hasFilters = Boolean(search.trim()) || teamId !== null || sportId !== null || skillId !== null || active !== null;
 
     return (
         <>
@@ -165,10 +169,10 @@ function PlayersContent() {
             <div className="card">
                 <h5>Lista de jugadores {!loading && <span className="text-600 font-normal">({players.length})</span>}</h5>
                 <div className="grid mb-2">
-                    <div className="col-12 md:col-6 lg:col-3">
+                    <div className="col-12 md:col-6 lg:col">
                         <SearchInput value={searchText} onChange={setSearchText} ariaLabel="Buscar jugadores por nombre o documento" placeholder="Nombre o documento" className="w-full" />
                     </div>
-                    <div className="col-12 md:col-6 lg:col-3">
+                    <div className="col-12 md:col-6 lg:col">
                         <Dropdown
                             value={teamId}
                             options={teams.map((team) => ({ label: team.name, value: team.id }))}
@@ -181,7 +185,7 @@ function PlayersContent() {
                             className="w-full"
                         />
                     </div>
-                    <div className="col-12 md:col-6 lg:col-3">
+                    <div className="col-12 md:col-6 lg:col">
                         <Dropdown
                             value={sportId}
                             options={sports.map((sport) => ({ label: sport.name, value: sport.id }))}
@@ -193,7 +197,20 @@ function PlayersContent() {
                             className="w-full"
                         />
                     </div>
-                    <div className="col-12 md:col-6 lg:col-3">
+                    <div className="col-12 md:col-6 lg:col">
+                        <Dropdown
+                            value={skillId}
+                            options={skills.map((skill) => ({ label: skill.name, value: skill.id }))}
+                            onChange={(event) => setSkillId((event.value as number | null) ?? null)}
+                            placeholder={canListSkills ? 'Todas las habilidades' : 'Sin permiso para ver habilidades'}
+                            aria-label="Filtrar por habilidad"
+                            filter={skills.length > 8}
+                            showClear
+                            disabled={!canListSkills}
+                            className="w-full"
+                        />
+                    </div>
+                    <div className="col-12 md:col-6 lg:col">
                         <Dropdown value={active} options={ACTIVE_OPTIONS} placeholder="Todos los estados" onChange={(event) => setActive((event.value as boolean | null) ?? null)} aria-label="Filtrar por estado" className="w-full" />
                     </div>
                 </div>

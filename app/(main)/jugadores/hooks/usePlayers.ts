@@ -10,11 +10,12 @@ export interface PlayerFilters {
     search: string;
     teamId: number | null;
     sportId: number | null;
+    skillId: number | null;
     active: boolean | null;
 }
 
-// Los filtros se aplican en ms-sports (GET /players?search&teamId&sportId&active).
-export function usePlayers({ search, teamId, sportId, active }: PlayerFilters) {
+// Los filtros se aplican en ms-sports (GET /players?search&teamId&sportId&skillId&active).
+export function usePlayers({ search, teamId, sportId, skillId, active }: PlayerFilters) {
     const [players, setPlayers] = useState<Player[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export function usePlayers({ search, teamId, sportId, active }: PlayerFilters) {
         setLoading(true);
         setError(null);
 
-        listPlayers({ search: search.trim() || undefined, teamId: teamId ?? undefined, sportId: sportId ?? undefined, active: active ?? undefined }, controller.signal)
+        listPlayers({ search: search.trim() || undefined, teamId: teamId ?? undefined, sportId: sportId ?? undefined, skillId: skillId ?? undefined, active: active ?? undefined }, controller.signal)
             .then(setPlayers)
             .catch((cause) => {
                 if (!controller.signal.aborted) setError(describeError(cause));
@@ -35,7 +36,7 @@ export function usePlayers({ search, teamId, sportId, active }: PlayerFilters) {
             });
 
         return () => controller.abort();
-    }, [search, teamId, sportId, active, reloadKey]);
+    }, [search, teamId, sportId, skillId, active, reloadKey]);
 
     const reload = useCallback(() => setReloadKey((key) => key + 1), []);
 

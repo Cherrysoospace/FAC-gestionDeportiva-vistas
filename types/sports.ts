@@ -533,6 +533,8 @@ export interface PlayerQuery {
     teamId?: number;
     // Contrato vigente en un equipo de ese deporte
     sportId?: number;
+    // HU-GD-07: jugadores que poseen esa habilidad
+    skillId?: number;
 }
 
 // ---- Equipo-Jugador (team-players/dto/team-player-response.dto.ts) ----
