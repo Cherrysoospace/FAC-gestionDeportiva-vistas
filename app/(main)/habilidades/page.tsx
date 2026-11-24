@@ -23,14 +23,17 @@ import {
     SKILL_CATEGORY_SEVERITY,
     SKILL_CREATE_ENDPOINT,
     SKILL_DELETE_ENDPOINT,
+    SKILL_DETAIL_ENDPOINT,
     SKILL_UPDATE_ENDPOINT,
     SKILLS_VIEW_ENDPOINTS
 } from '@/lib/skill-constants';
+import { PLAYER_SKILLS_LIST_ENDPOINT } from '@/lib/player-constants';
 import { SkillFormValues, toCreateSkillPayload, toUpdateSkillPayload } from '@/lib/skill-form';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Skill, SkillCategory } from '@/types/sports';
 import { useResourceList } from '../hooks/useResourceList';
+import SkillDetailDialog from './components/SkillDetailDialog';
 import SkillFormDialog from './components/SkillFormDialog';
 
 const SKELETON_ROWS: Skill[] = Array.from({ length: 5 }, (_, index) => ({ id: -(index + 1), name: '', category: 'PHYSICAL', description: '' }));
@@ -59,7 +62,10 @@ function SkillsContent() {
     const canCreate = can(SKILL_CREATE_ENDPOINT);
     const canUpdate = can(SKILL_UPDATE_ENDPOINT);
     const canDelete = can(SKILL_DELETE_ENDPOINT);
-    const hasActions = canUpdate || canDelete;
+    const canViewDetail = can(SKILL_DETAIL_ENDPOINT);
+    const canListPlayers = can(PLAYER_SKILLS_LIST_ENDPOINT);
+    const hasActions = canViewDetail || canUpdate || canDelete;
+    const [detailSkillId, setDetailSkillId] = useState<number | null>(null);
 
     const { items: skills, loading, error, reload, create, update, remove } = useResourceList(skillsClient);
 
@@ -112,6 +118,7 @@ function SkillsContent() {
         if (loading) return <Skeleton width="6rem" height="2rem" />;
         return (
             <div className="flex gap-1">
+                {canViewDetail && <Button icon="pi pi-eye" rounded text tooltip="Ver detalle" tooltipOptions={{ position: 'top' }} aria-label={`Ver detalle de ${skill.name}`} onClick={() => setDetailSkillId(skill.id)} />}
                 {canUpdate && <Button icon="pi pi-pencil" rounded text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label={`Editar ${skill.name}`} onClick={() => setDialog({ visible: true, skill })} />}
                 {canDelete && <Button icon="pi pi-trash" rounded text severity="danger" tooltip="Eliminar" tooltipOptions={{ position: 'top' }} aria-label={`Eliminar ${skill.name}`} onClick={() => handleDelete(skill)} />}
             </div>
@@ -159,9 +166,11 @@ function SkillsContent() {
                     <Column header="Habilidad" body={nameBody} />
                     <Column header="Categoría" body={categoryBody} />
                     <Column header="Descripción" body={descriptionBody} />
-                    {hasActions && <Column header="Acciones" body={actionsBody} headerClassName="w-8rem" />}
+                    {hasActions && <Column header="Acciones" body={actionsBody} headerClassName="w-10rem" />}
                 </DataTable>
             </div>
+
+            <SkillDetailDialog skillId={detailSkillId} canListPlayers={canListPlayers} onHide={() => setDetailSkillId(null)} />
 
             <SkillFormDialog visible={dialog.visible} skill={dialog.skill} onHide={closeDialog} onSubmit={handleSubmit} />
         </>

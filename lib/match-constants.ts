@@ -7,6 +7,9 @@ const POSITIONS = `${SPORTS_PERMISSION_PREFIX}/match-positions`;
 
 export const MATCHES_VIEW_ENDPOINTS: EndpointRequirement[] = [{ url: MATCHES, method: 'GET' }];
 
+// HU-GC-06 #8: detalle de un partido
+export const MATCH_DETAIL_ENDPOINT: EndpointRequirement = { url: `${MATCHES}/{id}`, method: 'GET' };
+
 export const MATCH_CREATE_ENDPOINT: EndpointRequirement = { url: MATCHES, method: 'POST' };
 
 // Editar datos y cambiar estado (iniciar / cancelar) usan el mismo PATCH

@@ -36,3 +36,6 @@ export const PLAYER_SKILL_CREATE_ENDPOINT: EndpointRequirement = { url: PLAYER_S
 export const PLAYER_SKILL_UPDATE_ENDPOINT: EndpointRequirement = { url: `${PLAYER_SKILLS}/{id}`, method: 'PATCH' };
 
 export const PLAYER_SKILL_DELETE_ENDPOINT: EndpointRequirement = { url: `${PLAYER_SKILLS}/{id}`, method: 'DELETE' };
+
+// Jugadores que tienen una habilidad (detalle de la habilidad, HU-GD-07 #6)
+export const PLAYER_SKILLS_LIST_ENDPOINT: EndpointRequirement = { url: PLAYER_SKILLS, method: 'GET' };

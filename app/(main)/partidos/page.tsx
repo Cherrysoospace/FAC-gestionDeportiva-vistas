@@ -24,6 +24,7 @@ import {
     GOALS_LIST_ENDPOINT,
     MATCH_CREATE_ENDPOINT,
     MATCH_DELETE_ENDPOINT,
+    MATCH_DETAIL_ENDPOINT,
     MATCH_FORM_ENDPOINTS,
     MATCH_RECORD_RESULT_ENDPOINT,
     MATCH_UPDATE_ENDPOINT,
@@ -50,6 +51,7 @@ import { listTournaments } from '@/lib/tournaments-api';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Match, MatchStatus, RecordMatchResultPayload, Tournament } from '@/types/sports';
+import MatchDetailDialog from './components/MatchDetailDialog';
 import MatchFormDialog from './components/MatchFormDialog';
 import MatchGoalsDialog from './components/MatchGoalsDialog';
 import MatchResultDialog from './components/MatchResultDialog';
@@ -76,6 +78,7 @@ function MatchesContent() {
     const [dialog, setDialog] = useState<DialogState>({ visible: false, match: null });
     const [resultMatch, setResultMatch] = useState<Match | null>(null);
     const [goalsMatch, setGoalsMatch] = useState<Match | null>(null);
+    const [detailMatchId, setDetailMatchId] = useState<number | null>(null);
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
     const can = (...endpoints: EndpointRequirement[]) => endpoints.every((endpoint) => hasPermissionUrl(endpoint.url, endpoint.method));
@@ -83,6 +86,7 @@ function MatchesContent() {
     const canUpdate = can(MATCH_UPDATE_ENDPOINT);
     const canEdit = canUpdate && can(...MATCH_FORM_ENDPOINTS);
     const canDelete = can(MATCH_DELETE_ENDPOINT);
+    const canViewDetail = can(MATCH_DETAIL_ENDPOINT);
     const canViewBoard = can(...BOARD_VIEW_ENDPOINTS);
     const canRecordMatchResult = can(MATCH_RECORD_RESULT_ENDPOINT);
     const canViewGoals = can(GOALS_LIST_ENDPOINT);
@@ -222,6 +226,7 @@ function MatchesContent() {
         const tournamentClosed = isMatchTournamentClosed(match);
         return (
             <div className="flex gap-1">
+                {canViewDetail && <Button icon="pi pi-eye" rounded text tooltip="Ver detalle" tooltipOptions={{ position: 'top' }} aria-label="Ver detalle del partido" onClick={() => setDetailMatchId(match.id)} />}
                 {canViewBoard && <Button icon="pi pi-map" rounded text tooltip="Pizarra" tooltipOptions={{ position: 'top' }} aria-label="Ver pizarra" onClick={() => router.push(`/partidos/${match.id}/pizarra`)} />}
                 {canViewGoals && canViewMatchGoals(match.status) && (
                     <Button icon="pi pi-list" rounded text tooltip="Anotaciones" tooltipOptions={{ position: 'top' }} aria-label="Ver anotaciones del partido" onClick={() => setGoalsMatch(match)} />
@@ -340,6 +345,7 @@ function MatchesContent() {
                 </DataTable>
             </div>
 
+            <MatchDetailDialog matchId={detailMatchId} onHide={() => setDetailMatchId(null)} />
             <MatchFormDialog visible={dialog.visible} match={dialog.match} onHide={() => setDialog({ visible: false, match: null })} onSubmit={handleSubmit} />
             <MatchResultDialog visible={resultMatch !== null} match={resultMatch} onHide={() => setResultMatch(null)} onSubmit={handleRecordResult} />
             <MatchGoalsDialog
