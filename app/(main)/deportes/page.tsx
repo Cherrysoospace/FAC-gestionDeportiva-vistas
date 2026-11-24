@@ -17,13 +17,15 @@ import SearchInput from '@/components/ui/SearchInput';
 import { useAuth } from '@/layout/context/authcontext';
 import ProtectedRoute from '@/layout/ProtectedRoute';
 import { FormActionResult } from '@/lib/form-action';
-import { SPORT_CREATE_ENDPOINT, SPORT_DELETE_ENDPOINT, SPORT_UPDATE_ENDPOINT, SPORTS_VIEW_ENDPOINTS } from '@/lib/sport-constants';
+import { SPORT_CREATE_ENDPOINT, SPORT_DELETE_ENDPOINT, SPORT_DETAIL_ENDPOINT, SPORT_UPDATE_ENDPOINT, SPORTS_VIEW_ENDPOINTS } from '@/lib/sport-constants';
+import { TEAM_SPORTS_LIST_ENDPOINT } from '@/lib/team-constants';
 import { sportsClient } from '@/lib/sport-api';
 import { SportFormValues, toCreateSportPayload, toUpdateSportPayload } from '@/lib/sport-form';
 import { ActionResult } from '@/types/action';
 import { EndpointRequirement } from '@/types/security';
 import { Sport } from '@/types/sports';
 import { useResourceList } from '../hooks/useResourceList';
+import SportDetailDialog from './components/SportDetailDialog';
 import SportFormDialog from './components/SportFormDialog';
 
 const SKELETON_ROWS: Sport[] = Array.from({ length: 5 }, (_, index) => ({ id: -(index + 1), name: '', description: null, active: true, parent: null }));
@@ -63,7 +65,10 @@ function SportsContent() {
     const canCreate = can(SPORT_CREATE_ENDPOINT);
     const canUpdate = can(SPORT_UPDATE_ENDPOINT);
     const canDelete = can(SPORT_DELETE_ENDPOINT);
-    const hasActions = canUpdate || canDelete;
+    const canViewDetail = can(SPORT_DETAIL_ENDPOINT);
+    const canListTeams = can(TEAM_SPORTS_LIST_ENDPOINT);
+    const hasActions = canViewDetail || canUpdate || canDelete;
+    const [detailSportId, setDetailSportId] = useState<number | null>(null);
 
     // Se carga el catálogo completo una vez: también sirve de opciones para el deporte padre
     const { items: sports, loading, error, reload, create, update, remove } = useResourceList(sportsClient);
@@ -147,6 +152,7 @@ function SportsContent() {
         if (loading) return <Skeleton width="6rem" height="2rem" />;
         return (
             <div className="flex gap-1">
+                {canViewDetail && <Button icon="pi pi-eye" rounded text tooltip="Ver detalle" tooltipOptions={{ position: 'top' }} aria-label={`Ver detalle de ${sport.name}`} onClick={() => setDetailSportId(sport.id)} />}
                 {canUpdate && <Button icon="pi pi-pencil" rounded text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label={`Editar ${sport.name}`} onClick={() => setDialog({ visible: true, sport })} />}
                 {canDelete && <Button icon="pi pi-trash" rounded text severity="danger" tooltip="Eliminar" tooltipOptions={{ position: 'top' }} aria-label={`Eliminar ${sport.name}`} onClick={() => handleDelete(sport)} />}
             </div>
@@ -199,9 +205,11 @@ function SportsContent() {
                     <Column header="Deporte padre" body={parentBody} />
                     <Column header="Subdeportes" body={subSportsBody} />
                     <Column header="Estado" body={activeBody} />
-                    {hasActions && <Column header="Acciones" body={actionsBody} headerClassName="w-8rem" />}
+                    {hasActions && <Column header="Acciones" body={actionsBody} headerClassName="w-10rem" />}
                 </DataTable>
             </div>
+
+            <SportDetailDialog sportId={detailSportId} canListTeams={canListTeams} onHide={() => setDetailSportId(null)} />
 
             <SportFormDialog visible={dialog.visible} sport={dialog.sport} sports={sports} onHide={closeDialog} onSubmit={handleSubmit} />
         </>

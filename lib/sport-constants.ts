@@ -13,3 +13,6 @@ export const SPORT_UPDATE_ENDPOINT: EndpointRequirement = { url: `${SPORTS}/{id}
 
 export const SPORT_DELETE_ENDPOINT: EndpointRequirement = { url: `${SPORTS}/{id}`, method: 'DELETE' };
 
+
+// HU-GD-01 #5: detalle de un deporte (GET /sports/:id)
+export const SPORT_DETAIL_ENDPOINT: EndpointRequirement = { url: `${SPORTS}/{id}`, method: 'GET' };
